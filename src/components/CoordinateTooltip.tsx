@@ -5,10 +5,10 @@ interface Pixel {
   x: number;
   y: number;
   color: string;
-  owner?: string;
+  image_url?: string;
+  link?: string;
+  owner_wallet?: string;
   last_price?: number;
-  url?: string;
-  image?: string;
 }
 
 interface CoordinateTooltipProps {
@@ -45,9 +45,9 @@ export const CoordinateTooltip: React.FC<CoordinateTooltipProps> = ({
               />
               <span>{pixel.color}</span>
             </div>
-            {pixel.owner && (
+            {pixel.owner_wallet && (
               <div className="text-primary-purple">
-                Owner: {pixel.owner}
+                Owner: {pixel.owner_wallet}
               </div>
             )}
             <div className="text-yellow-400">
