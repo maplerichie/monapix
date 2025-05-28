@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Palette, Upload, Link, ShoppingCart } from 'lucide-react';
+import { Palette, Upload, Link, ShoppingCart, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Pixel {
@@ -31,6 +31,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
 }) => {
   const [color, setColor] = useState(pixel.color);
   const [url, setUrl] = useState(pixel.url || '');
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const presetColors = [
@@ -47,14 +48,13 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
     setIsProcessing(true);
     
     try {
-      // Simulate processing time
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const updatedPixel: Pixel = {
         ...pixel,
         color,
-        url: url || undefined,
-        owner: 'current_user', // In real app, this would be the actual user
+        url: uploadedImage || url || undefined,
+        owner: 'current_user',
       };
       
       onSave(updatedPixel);
@@ -70,13 +70,12 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
     setIsProcessing(true);
     
     try {
-      // Simulate purchase processing
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       const purchasedPixel: Pixel = {
         ...pixel,
         color,
-        url: url || undefined,
+        url: uploadedImage || url || undefined,
         owner: 'current_user',
       };
       
@@ -89,38 +88,93 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const resizeImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+
+      img.onload = () => {
+        canvas.width = 128;
+        canvas.height = 128;
+        
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, 128, 128);
+          const resizedDataUrl = canvas.toDataURL(file.type, 0.8);
+          resolve(resizedDataUrl);
+        } else {
+          reject(new Error('Failed to get canvas context'));
+        }
+      };
+
+      img.onerror = () => reject(new Error('Failed to load image'));
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 1024 * 1024) { // 1MB limit
+    if (file.size > 1024 * 1024) {
       toast.error('Image too large. Max size: 1MB');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        if (img.width > 128 || img.height > 128) {
-                        // Dynamically create a canvas element
-                        var canvas = document.createElement("canvas");
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload a valid image file');
+      return;
+    }
 
-                        // var canvas = document.getElementById("canvas");
-                        var ctx = canvas.getContext("2d");
+    try {
+      setIsProcessing(true);
+      
+      // Create a temporary image to check dimensions
+      const tempImg = new Image();
+      const checkDimensions = new Promise<boolean>((resolve) => {
+        tempImg.onload = () => {
+          resolve(tempImg.width > 128 || tempImg.height > 128);
+        };
+      });
 
-                        // Actual resizing
-                        ctx.drawImage(img, 0, 0, 128, 128);
-
-                        // Show resized image in preview element
-                        var dataurl = canvas.toDataURL(file.type);
-                        img.src = dataurl;
-        }
-        toast.success('Image uploaded successfully!');
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        tempImg.src = e.target?.result as string;
       };
-      img.src = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+      reader.readAsDataURL(file);
+
+      const needsResize = await checkDimensions;
+
+      if (needsResize) {
+        const resizedImage = await resizeImage(file);
+        setUploadedImage(resizedImage);
+        toast.success('Image resized and uploaded successfully!');
+      } else {
+        // Image is already 128x128 or smaller, use as is
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setUploadedImage(e.target?.result as string);
+          toast.success('Image uploaded successfully!');
+        };
+        reader.readAsDataURL(file);
+      }
+    } catch (error) {
+      toast.error('Failed to process image');
+      console.error('Image upload error:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setUploadedImage(null);
+    toast.success('Image removed');
   };
 
   return (
@@ -182,32 +236,59 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
           <TabsContent value="image" className="space-y-4">
             <div className="space-y-2">
               <Label>Upload Image</Label>
-              <div className="border-2 border-dashed border-neon-green/30 rounded-lg p-6 text-center">
-                <Upload className="w-8 h-8 mx-auto mb-2 text-neon-green" />
-                <div className="text-sm text-gray-400 mb-2">
-                  Max size: 128x128px, 1MB
+              {uploadedImage ? (
+                <div className="space-y-2">
+                  <div className="relative border-2 border-neon-green/50 rounded-lg p-2">
+                    <img 
+                      src={uploadedImage} 
+                      alt="Uploaded preview" 
+                      className="w-full h-32 object-contain rounded"
+                    />
+                    <button
+                      onClick={handleRemoveImage}
+                      className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 rounded-full p-1"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                  <div className="text-xs text-neon-green text-center">
+                    Image ready for pixel
+                  </div>
                 </div>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="bg-transparent border-none"
-                />
-              </div>
+              ) : (
+                <div className="border-2 border-dashed border-neon-green/30 rounded-lg p-6 text-center">
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-neon-green" />
+                  <div className="text-sm text-gray-400 mb-2">
+                    Max size: 128x128px, 1MB
+                  </div>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="bg-transparent border-none"
+                    disabled={isProcessing}
+                  />
+                  {isProcessing && (
+                    <div className="text-xs text-neon-blue mt-2">
+                      Processing image...
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
 
-              <div className="flex gap-2">
-                <Link className="w-5 h-5 mt-2 text-neon-blue" />
-                <Input
-                  type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  className="bg-gray-800 border-neon-green/50"
-                  placeholder="https://example.com"
-                />
-              </div>
+        <div className="flex gap-2">
+          <Link className="w-5 h-5 mt-2 text-neon-blue" />
+          <Input
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="bg-gray-800 border-neon-green/50"
+            placeholder="https://example.com"
+          />
+        </div>
         
         <div className="flex gap-2 pt-4">
           {pixel.owner ? (
