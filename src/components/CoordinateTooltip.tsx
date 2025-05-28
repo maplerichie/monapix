@@ -34,9 +34,6 @@ export const CoordinateTooltip: React.FC<CoordinateTooltipProps> = ({
         top: Math.max(y - 80, 10),
       }}
     >
-      <div className="text-neon-green font-bold text-xs mb-1">
-        PIXEL INFO
-      </div>
       <div className="text-xs space-y-1">
         <div>X: {pixelX}, Y: {pixelY}</div>
         {pixel ? (

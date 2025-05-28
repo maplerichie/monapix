@@ -121,7 +121,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
         <DialogHeader>
           <DialogTitle className="text-neon-green glow-effect flex items-center gap-2">
             <Palette className="w-5 h-5" />
-            PIXEL EDITOR
+            EDITOR
           </DialogTitle>
           <div className="text-sm text-neon-blue">
             Position: ({pixel.x}, {pixel.y})
@@ -132,7 +132,6 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
           <TabsList className="grid w-full grid-cols-3 bg-gray-800">
             <TabsTrigger value="color">Color</TabsTrigger>
             <TabsTrigger value="image">Image</TabsTrigger>
-            <TabsTrigger value="link">Link</TabsTrigger>
           </TabsList>
 
           <TabsContent value="color" className="space-y-4">
@@ -189,10 +188,8 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
               </div>
             </div>
           </TabsContent>
+        </Tabs>
 
-          <TabsContent value="link" className="space-y-4">
-            <div className="space-y-2">
-              <Label>Website URL</Label>
               <div className="flex gap-2">
                 <Link className="w-5 h-5 mt-2 text-neon-blue" />
                 <Input
@@ -203,10 +200,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
                   placeholder="https://example.com"
                 />
               </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-
+        
         <div className="flex gap-2 pt-4">
           {pixel.owner ? (
             <Button
