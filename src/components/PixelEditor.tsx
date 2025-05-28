@@ -103,11 +103,19 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
       const img = new Image();
       img.onload = () => {
         if (img.width > 128 || img.height > 128) {
-          toast.error('Image too large. Max size: 128x128px');
-          return;
+                        // Dynamically create a canvas element
+                        var canvas = document.createElement("canvas");
+
+                        // var canvas = document.getElementById("canvas");
+                        var ctx = canvas.getContext("2d");
+
+                        // Actual resizing
+                        ctx.drawImage(img, 0, 0, 128, 128);
+
+                        // Show resized image in preview element
+                        var dataurl = canvas.toDataURL(imageFile.type);
+                        img.src = dataurl;
         }
-        // Process image and extract dominant color
-        setColor('#' + Math.floor(Math.random()*16777215).toString(16));
         toast.success('Image uploaded successfully!');
       };
       img.src = e.target?.result as string;
