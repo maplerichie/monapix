@@ -136,7 +136,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
 
           <TabsContent value="color" className="space-y-4">
             <div className="space-y-2">
-              <Label>Color Picker</Label>
+              <Label>Pick a Color</Label>
               <div className="flex gap-2">
                 <Input
                   type="color"
@@ -155,7 +155,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label>Preset Colors</Label>
+              <Label>Preset</Label>
               <div className="grid grid-cols-8 gap-1">
                 {presetColors.map((presetColor) => (
                   <button
