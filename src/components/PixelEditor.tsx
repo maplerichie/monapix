@@ -113,7 +113,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
                         ctx.drawImage(img, 0, 0, 128, 128);
 
                         // Show resized image in preview element
-                        var dataurl = canvas.toDataURL(imageFile.type);
+                        var dataurl = canvas.toDataURL(file.type);
                         img.src = dataurl;
         }
         toast.success('Image uploaded successfully!');
