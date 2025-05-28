@@ -22,8 +22,8 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
             size="icon"
             variant="outline"
             className="cyber-button p-2"
-            onClick={() => onZoomChange(Math.max(100, zoom - 25))}
-            disabled={zoom <= 100}
+            onClick={() => onZoomChange(Math.max(250, zoom - 25))}
+            disabled={zoom <= 250}
           >
             <ZoomOut/>
           </Button>
@@ -32,8 +32,8 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
             <Slider
               value={[zoom]}
               onValueChange={(value) => onZoomChange(value[0])}
-              min={100}
-              max={500}
+              min={250}
+              max={1000}
               step={25}
               className="w-full"
             />
@@ -43,8 +43,8 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
             size="icon"
             variant="outline"
             className="cyber-button p-2"
-            onClick={() => onZoomChange(Math.min(500, zoom + 25))}
-            disabled={zoom >= 500}
+            onClick={() => onZoomChange(Math.min(1000, zoom + 25))}
+            disabled={zoom >= 1000}
           >
             <ZoomIn/>
           </Button>

@@ -17,7 +17,7 @@ interface Pixel {
 export const PixelCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(150);
+  const [zoom, setZoom] = useState(250);
   const [pan, setPan] = useState({ x: -100, y: -100 });
   const [hoveredPixel, setHoveredPixel] = useState<{ x: number; y: number } | null>(null);
   const [selectedPixel, setSelectedPixel] = useState<Pixel | null>(null);
