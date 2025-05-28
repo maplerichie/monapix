@@ -9,7 +9,77 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      pixels: {
+        Row: {
+          color: string
+          created_at: string
+          image_url: string | null
+          last_price: number | null
+          link: string | null
+          owner_wallet: string | null
+          pixel_id: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          image_url?: string | null
+          last_price?: number | null
+          link?: string | null
+          owner_wallet?: string | null
+          pixel_id: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          image_url?: string | null
+          last_price?: number | null
+          link?: string | null
+          owner_wallet?: string | null
+          pixel_id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          created_at: string
+          from_wallet: string | null
+          id: string
+          pixel_id: number
+          to_wallet: string | null
+          transaction_hash: string
+          transaction_type: string
+        }
+        Insert: {
+          created_at?: string
+          from_wallet?: string | null
+          id?: string
+          pixel_id: number
+          to_wallet?: string | null
+          transaction_hash: string
+          transaction_type: string
+        }
+        Update: {
+          created_at?: string
+          from_wallet?: string | null
+          id?: string
+          pixel_id?: number
+          to_wallet?: string | null
+          transaction_hash?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_pixel_id_fkey"
+            columns: ["pixel_id"]
+            isOneToOne: false
+            referencedRelation: "pixels"
+            referencedColumns: ["pixel_id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

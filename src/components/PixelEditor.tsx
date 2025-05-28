@@ -7,16 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Palette, Upload, Link, ShoppingCart, X } from 'lucide-react';
 import { toast } from 'sonner';
-
-interface Pixel {
-  x: number;
-  y: number;
-  color: string;
-  owner?: string;
-  price: number;
-  url?: string;
-  image?: string;
-}
+import { supabase } from '@/integrations/supabase/client';
+import { useWeb3 } from '@/contexts/Web3Context';
+import { type Pixel } from '@/hooks/usePixelData';
 
 interface PixelEditorProps {
   pixel: Pixel;
@@ -30,9 +23,11 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
   onClose,
 }) => {
   const [color, setColor] = useState(pixel.color);
-  const [url, setUrl] = useState(pixel.url || '');
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [link, setLink] = useState(pixel.link || '');
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(pixel.image_url || null);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  const { account, isConnected, connectWallet } = useWeb3();
 
   const presetColors = [
     '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff',
@@ -45,16 +40,24 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
   };
 
   const handleSave = async () => {
+    if (!isConnected) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+
     setIsProcessing(true);
     
     try {
+      // Simulate smart contract interaction
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const updatedPixel: Pixel = {
         ...pixel,
         color,
-        url: uploadedImage || url || undefined,
-        owner: 'current_user',
+        image_url: uploadedImageUrl || undefined,
+        link: link || undefined,
+        owner_wallet: account!,
+        last_price: pixel.last_price || 1,
       };
       
       onSave(updatedPixel);
@@ -66,21 +69,29 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
     }
   };
 
-  const handlePurchase = async () => {
+  const handleMint = async () => {
+    if (!isConnected) {
+      await connectWallet();
+      return;
+    }
+
     setIsProcessing(true);
     
     try {
+      // Simulate smart contract minting
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const purchasedPixel: Pixel = {
+      const mintedPixel: Pixel = {
         ...pixel,
         color,
-        url: uploadedImage || url || undefined,
-        owner: 'current_user',
+        image_url: uploadedImageUrl || undefined,
+        link: link || undefined,
+        owner_wallet: account!,
+        last_price: pixel.last_price || 1,
       };
       
-      onSave(purchasedPixel);
-      toast.success(`Pixel minted for ${pixel.price} ETH!`);
+      onSave(mintedPixel);
+      toast.success(`Pixel minted for ${pixel.last_price || 1} ETH!`);
     } catch (error) {
       toast.error('Mint failed');
     } finally {
@@ -88,7 +99,27 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
     }
   };
 
-  const resizeImage = (file: File): Promise<string> => {
+  const uploadImageToStorage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${pixel.pixel_id}-${Date.now()}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from('pixel-images')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('pixel-images')
+      .getPublicUrl(data.path);
+
+    return publicUrl;
+  };
+
+  const resizeImage = (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -100,8 +131,17 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
         
         if (ctx) {
           ctx.drawImage(img, 0, 0, 128, 128);
-          const resizedDataUrl = canvas.toDataURL(file.type, 0.8);
-          resolve(resizedDataUrl);
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const resizedFile = new File([blob], file.name, {
+                type: file.type,
+                lastModified: Date.now(),
+              });
+              resolve(resizedFile);
+            } else {
+              reject(new Error('Failed to create resized image'));
+            }
+          }, file.type, 0.8);
         } else {
           reject(new Error('Failed to get canvas context'));
         }
@@ -135,37 +175,31 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
     try {
       setIsProcessing(true);
       
-      // Create a temporary image to check dimensions
+      let fileToUpload = file;
+      
+      // Check if image needs resizing
       const tempImg = new Image();
-      const checkDimensions = new Promise<boolean>((resolve) => {
+      const needsResize = await new Promise<boolean>((resolve) => {
         tempImg.onload = () => {
           resolve(tempImg.width > 128 || tempImg.height > 128);
         };
-      });
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        tempImg.src = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-
-      const needsResize = await checkDimensions;
-
-      if (needsResize) {
-        const resizedImage = await resizeImage(file);
-        setUploadedImage(resizedImage);
-        toast.success('Image resized and uploaded successfully!');
-      } else {
-        // Image is already 128x128 or smaller, use as is
         const reader = new FileReader();
         reader.onload = (e) => {
-          setUploadedImage(e.target?.result as string);
-          toast.success('Image uploaded successfully!');
+          tempImg.src = e.target?.result as string;
         };
         reader.readAsDataURL(file);
+      });
+
+      if (needsResize) {
+        fileToUpload = await resizeImage(file);
+        toast.success('Image resized to 128x128px');
       }
+
+      const imageUrl = await uploadImageToStorage(fileToUpload);
+      setUploadedImageUrl(imageUrl);
+      toast.success('Image uploaded successfully!');
     } catch (error) {
-      toast.error('Failed to process image');
+      toast.error('Failed to upload image');
       console.error('Image upload error:', error);
     } finally {
       setIsProcessing(false);
@@ -173,7 +207,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
   };
 
   const handleRemoveImage = () => {
-    setUploadedImage(null);
+    setUploadedImageUrl(null);
     toast.success('Image removed');
   };
 
@@ -187,6 +221,11 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
           </DialogTitle>
           <div className="text-sm text-neon-blue">
             Position: ({pixel.x}, {pixel.y})
+            {pixel.owner_wallet && (
+              <div className="text-xs text-purple-400">
+                Owner: {pixel.owner_wallet.slice(0, 6)}...{pixel.owner_wallet.slice(-4)}
+              </div>
+            )}
           </div>
         </DialogHeader>
 
@@ -236,11 +275,11 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
           <TabsContent value="image" className="space-y-4">
             <div className="space-y-2">
               <Label>Upload Image</Label>
-              {uploadedImage ? (
+              {uploadedImageUrl ? (
                 <div className="space-y-2">
                   <div className="relative border-2 border-neon-green/50 rounded-lg p-2">
                     <img 
-                      src={uploadedImage} 
+                      src={uploadedImageUrl} 
                       alt="Uploaded preview" 
                       className="w-full h-32 object-contain rounded"
                     />
@@ -283,30 +322,30 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
           <Link className="w-5 h-5 mt-2 text-neon-blue" />
           <Input
             type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
             className="bg-gray-800 border-neon-green/50"
             placeholder="https://example.com"
           />
         </div>
         
         <div className="flex gap-2 pt-4">
-          {pixel.owner ? (
+          {pixel.owner_wallet ? (
             <Button
               onClick={handleSave}
-              disabled={isProcessing}
+              disabled={isProcessing || !isConnected}
               className="cyber-button flex-1"
             >
               {isProcessing ? 'Updating...' : 'Update Pixel'}
             </Button>
           ) : (
             <Button
-              onClick={handlePurchase}
+              onClick={handleMint}
               disabled={isProcessing}
               className="cyber-button flex-1"
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
-              {isProcessing ? 'Processing...' : `Mint for ${pixel.price} ETH`}
+              {isProcessing ? 'Minting...' : `Mint for ${pixel.last_price || 1} ETH`}
             </Button>
           )}
           
@@ -318,6 +357,12 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
             Cancel
           </Button>
         </div>
+
+        {!isConnected && (
+          <div className="text-center text-sm text-yellow-400">
+            Connect your wallet to mint pixels
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

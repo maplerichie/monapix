@@ -2,16 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { PixelEditor } from './PixelEditor';
 import { CanvasControls } from './CanvasControls';
 import { CoordinateTooltip } from './CoordinateTooltip';
-
-interface Pixel {
-  x: number;
-  y: number;
-  color: string;
-  owner?: string;
-  price: number;
-  url?: string;
-  image?: string;
-}
+import { usePixelData, type Pixel } from '@/hooks/usePixelData';
 
 export const PixelCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,45 +14,28 @@ export const PixelCanvas = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [pixels, setPixels] = useState<Map<string, Pixel>>(new Map());
   const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
-  // Initialize some sample pixels
+  const { pixels, loading, fetchPixels, savePixel } = usePixelData();
+
+  // Initialize by fetching pixels
   useEffect(() => {
-    const samplePixels = new Map<string, Pixel>();
-    
-    // Add some sample owned pixels
-    for (let i = 0; i < 50; i++) {
-      const x = Math.floor(Math.random() * 256);
-      const y = Math.floor(Math.random() * 256);
-      const colors = ['#00ff00', '#0080ff', '#ff4080', '#ffff00', '#ff8000'];
-      const hasUrl = Math.random() > 0.7; // 30% chance of having a URL
-      samplePixels.set(`${x},${y}`, {
-        x,
-        y,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        owner: `user${Math.floor(Math.random() * 10)}`,
-        price: 1 + Math.random() * 5,
-        url: hasUrl ? `https://picsum.photos/128/128?random=${i}` : undefined,
-      });
-    }
-    
-    setPixels(samplePixels);
+    fetchPixels();
   }, []);
 
   // Load images when pixels with URLs are added
   useEffect(() => {
     pixels.forEach((pixel, key) => {
-      if (pixel.url && !imageCache.has(pixel.url)) {
+      if (pixel.image_url && !imageCache.has(pixel.image_url)) {
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
-          setImageCache(prev => new Map(prev.set(pixel.url!, img)));
+          setImageCache(prev => new Map(prev.set(pixel.image_url!, img)));
         };
         img.onerror = () => {
           console.log(`Failed to load image for pixel at ${pixel.x}, ${pixel.y}`);
         };
-        img.src = pixel.url;
+        img.src = pixel.image_url;
       }
     });
   }, [pixels, imageCache]);
@@ -112,9 +86,9 @@ export const PixelCanvas = () => {
       if (canvasX >= -pixelSize && canvasX <= canvas.width && 
           canvasY >= -pixelSize && canvasY <= canvas.height) {
         
-        // Check if pixel has URL and image is loaded
-        if (pixel.url && imageCache.has(pixel.url)) {
-          const img = imageCache.get(pixel.url)!;
+        // Check if pixel has image and image is loaded
+        if (pixel.image_url && imageCache.has(pixel.image_url)) {
+          const img = imageCache.get(pixel.image_url)!;
           ctx.drawImage(img, canvasX, canvasY, pixelSize, pixelSize);
         } else {
           // Fallback to color
@@ -122,7 +96,7 @@ export const PixelCanvas = () => {
           ctx.fillRect(canvasX, canvasY, pixelSize, pixelSize);
         }
         
-        if (pixel.owner) {
+        if (pixel.owner_wallet) {
           ctx.strokeStyle = '#836EF9';
           ctx.lineWidth = 1;
           ctx.strokeRect(canvasX, canvasY, pixelSize, pixelSize);
@@ -165,6 +139,21 @@ export const PixelCanvas = () => {
   useEffect(() => {
     drawCanvas();
   }, [drawCanvas]);
+
+  const handlePixelSave = async (updatedPixel: Pixel) => {
+    try {
+      await savePixel(updatedPixel.x, updatedPixel.y, {
+        color: updatedPixel.color,
+        image_url: updatedPixel.image_url,
+        link: updatedPixel.link,
+        owner_wallet: updatedPixel.owner_wallet,
+        last_price: updatedPixel.last_price
+      });
+      setSelectedPixel(null);
+    } catch (error) {
+      console.error('Error saving pixel:', error);
+    }
+  };
 
   const getPixelCoordinates = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
@@ -219,10 +208,13 @@ export const PixelCanvas = () => {
       const existingPixel = pixels.get(pixelKey);
       
       setSelectedPixel(existingPixel || {
+        pixel_id: coords.x * 1000 + coords.y,
         x: coords.x,
         y: coords.y,
         color: '#ffffff',
-        price: 1,
+        last_price: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       });
     }
   };
@@ -238,17 +230,18 @@ export const PixelCanvas = () => {
   };
 
   const handlePanReset = () => {
-    // Random section at startup
     const randomX = Math.floor(Math.random() * 256) * -2;
     const randomY = Math.floor(Math.random() * 256) * -2;
     setPan({ x: randomX, y: randomY });
   };
 
-  const handlePixelSave = (updatedPixel: Pixel) => {
-    const pixelKey = `${updatedPixel.x},${updatedPixel.y}`;
-    setPixels(prev => new Map(prev.set(pixelKey, updatedPixel)));
-    setSelectedPixel(null);
-  };
+  if (loading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <div className="text-white">Loading pixel data...</div>
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className="w-full h-screen relative overflow-hidden">
