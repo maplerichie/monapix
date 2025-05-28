@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { ZoomIn, ZoomOut } from 'lucide-react';
 
 interface CanvasControlsProps {
   zoom: number;
@@ -18,10 +18,6 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
   return (
     <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-sm rounded-lg p-4 border border-neon-green/30">
       <div className="flex flex-col gap-4 min-w-[200px]">
-        <div className="text-neon-green font-bold text-sm glow-effect">
-          ZOOM CONTROL
-        </div>
-        
         <div className="flex items-center gap-2">
           <Button
             size="sm"
@@ -58,15 +54,6 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
         <div className="text-center text-neon-blue text-xs">
           {zoom}%
         </div>
-        
-        <Button
-          onClick={onPanReset}
-          className="cyber-button w-full"
-          size="sm"
-        >
-          <RotateCcw className="w-4 h-4 mr-2" />
-          Random View
-        </Button>
       </div>
     </div>
   );

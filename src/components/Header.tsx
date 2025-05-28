@@ -13,18 +13,15 @@ export const Header = () => {
             <h1 className="text-2xl font-bold text-neon-green glow-effect">
               MONAPIX
             </h1>
-            <div className="text-xs text-neon-blue hidden sm:block">
-              256x256 Pixel Marketplace
-            </div>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="hidden md:flex items-center gap-4 text-sm">
               <div className="text-gray-300">
-                Floor Price: <span className="text-yellow-400">1.0 ETH</span>
+                Price: <span className="text-yellow-400">1.0 ETH</span>
               </div>
               <div className="text-gray-300">
-                Total Pixels: <span className="text-neon-blue">65,536</span>
+                Minted: <span className="text-neon-blue">0/65,536</span>
               </div>
             </div>
 
@@ -34,14 +31,6 @@ export const Header = () => {
             >
               <Wallet className="w-4 h-4 mr-2" />
               Connect Wallet
-            </Button>
-
-            <Button
-              size="sm"
-              variant="outline"
-              className="border-neon-green/50 text-neon-green"
-            >
-              <User className="w-4 h-4" />
             </Button>
           </div>
         </div>
