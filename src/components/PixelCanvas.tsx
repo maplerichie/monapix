@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { PixelEditor } from './PixelEditor';
 import { CanvasControls } from './CanvasControls';
@@ -25,6 +24,7 @@ export const PixelCanvas = () => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [pixels, setPixels] = useState<Map<string, Pixel>>(new Map());
+  const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
   // Initialize some sample pixels
   useEffect(() => {
@@ -35,17 +35,36 @@ export const PixelCanvas = () => {
       const x = Math.floor(Math.random() * 256);
       const y = Math.floor(Math.random() * 256);
       const colors = ['#00ff00', '#0080ff', '#ff4080', '#ffff00', '#ff8000'];
+      const hasUrl = Math.random() > 0.7; // 30% chance of having a URL
       samplePixels.set(`${x},${y}`, {
         x,
         y,
         color: colors[Math.floor(Math.random() * colors.length)],
         owner: `user${Math.floor(Math.random() * 10)}`,
         price: 1 + Math.random() * 5,
+        url: hasUrl ? `https://picsum.photos/128/128?random=${i}` : undefined,
       });
     }
     
     setPixels(samplePixels);
   }, []);
+
+  // Load images when pixels with URLs are added
+  useEffect(() => {
+    pixels.forEach((pixel, key) => {
+      if (pixel.url && !imageCache.has(pixel.url)) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          setImageCache(prev => new Map(prev.set(pixel.url!, img)));
+        };
+        img.onerror = () => {
+          console.log(`Failed to load image for pixel at ${pixel.x}, ${pixel.y}`);
+        };
+        img.src = pixel.url;
+      }
+    });
+  }, [pixels, imageCache]);
 
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -55,7 +74,7 @@ export const PixelCanvas = () => {
     if (!ctx) return;
 
     // Clear canvas
-    ctx.fillStyle = '#1a1a2e';
+    ctx.fillStyle = '#200052';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Calculate pixel size based on zoom
@@ -92,11 +111,19 @@ export const PixelCanvas = () => {
       
       if (canvasX >= -pixelSize && canvasX <= canvas.width && 
           canvasY >= -pixelSize && canvasY <= canvas.height) {
-        ctx.fillStyle = pixel.color;
-        ctx.fillRect(canvasX, canvasY, pixelSize, pixelSize);
+        
+        // Check if pixel has URL and image is loaded
+        if (pixel.url && imageCache.has(pixel.url)) {
+          const img = imageCache.get(pixel.url)!;
+          ctx.drawImage(img, canvasX, canvasY, pixelSize, pixelSize);
+        } else {
+          // Fallback to color
+          ctx.fillStyle = pixel.color;
+          ctx.fillRect(canvasX, canvasY, pixelSize, pixelSize);
+        }
         
         if (pixel.owner) {
-          ctx.strokeStyle = '#00ff00';
+          ctx.strokeStyle = '#836EF9';
           ctx.lineWidth = 1;
           ctx.strokeRect(canvasX, canvasY, pixelSize, pixelSize);
         }
@@ -112,7 +139,7 @@ export const PixelCanvas = () => {
       ctx.lineWidth = 2;
       ctx.strokeRect(canvasX, canvasY, pixelSize, pixelSize);
     }
-  }, [zoom, pan, pixels, hoveredPixel]);
+  }, [zoom, pan, pixels, hoveredPixel, imageCache]);
 
   // Setup canvas and event listeners
   useEffect(() => {
