@@ -28,7 +28,7 @@ export const CoordinateTooltip: React.FC<CoordinateTooltipProps> = ({
 }) => {
   return (
     <div
-      className="fixed z-50 bg-black/90 backdrop-blur-sm text-white p-3 rounded-lg border border-neon-green/50 pointer-events-none animate-fade-in"
+      className="fixed z-50 bg-black/90 backdrop-blur-sm text-white p-3 rounded-lg border border-primary-purple/50 pointer-events-none animate-fade-in"
       style={{
         left: Math.min(x + 10, window.innerWidth - 200),
         top: Math.max(y - 80, 10),
@@ -46,7 +46,7 @@ export const CoordinateTooltip: React.FC<CoordinateTooltipProps> = ({
               <span>{pixel.color}</span>
             </div>
             {pixel.owner && (
-              <div className="text-neon-blue">
+              <div className="text-primary-purple">
                 Owner: {pixel.owner}
               </div>
             )}

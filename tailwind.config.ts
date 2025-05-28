@@ -63,13 +63,14 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom Monapix colors
+				// Custom Monapix colors - Updated Theme
 				neon: {
 					green: 'hsl(var(--neon-green))',
 					blue: 'hsl(var(--neon-blue))'
 				},
 				'dark-bg': 'hsl(var(--dark-bg))',
-				'pixel-border': 'hsl(var(--pixel-border))'
+				'pixel-border': 'hsl(var(--pixel-border))',
+				'primary-purple': 'hsl(var(--primary-purple))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -95,10 +96,10 @@ export default {
 				},
 				'pulse-neon': {
 					'0%, 100%': {
-						boxShadow: '0 0 5px hsl(var(--neon-green))'
+						boxShadow: '0 0 5px hsl(var(--primary-purple))'
 					},
 					'50%': {
-						boxShadow: '0 0 20px hsl(var(--neon-green)), 0 0 30px hsl(var(--neon-green))'
+						boxShadow: '0 0 20px hsl(var(--primary-purple)), 0 0 30px hsl(var(--primary-purple))'
 					}
 				},
 				'slide-up': {
