@@ -81,9 +81,9 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
       };
       
       onSave(purchasedPixel);
-      toast.success(`Pixel purchased for ${pixel.price} ETH!`);
+      toast.success(`Pixel minted for ${pixel.price} ETH!`);
     } catch (error) {
-      toast.error('Purchase failed');
+      toast.error('Mint failed');
     } finally {
       setIsProcessing(false);
     }
@@ -217,7 +217,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
               className="cyber-button flex-1"
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
-              {isProcessing ? 'Processing...' : `Buy for ${pixel.price} ETH`}
+              {isProcessing ? 'Processing...' : `Mint for ${pixel.price} ETH`}
             </Button>
           )}
           

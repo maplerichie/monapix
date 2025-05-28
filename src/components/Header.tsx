@@ -18,7 +18,7 @@ export const Header = () => {
           <div className="flex items-center gap-2">
             <div className="hidden md:flex items-center gap-4 text-sm">
               <div className="text-gray-300">
-                Price: <span className="text-yellow-400">1.0 ETH</span>
+                From: <span className="text-yellow-400">1.0 ETH</span>
               </div>
               <div className="text-gray-300">
                 Minted: <span className="text-primary-purple">0/65,536</span>

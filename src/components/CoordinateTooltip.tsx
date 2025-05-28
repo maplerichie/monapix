@@ -55,7 +55,7 @@ export const CoordinateTooltip: React.FC<CoordinateTooltipProps> = ({
             </div>
           </>
         ) : (
-          <div className="text-gray-400">Available for purchase</div>
+          <div className="text-gray-400">Available for mint</div>
         )}
       </div>
     </div>
