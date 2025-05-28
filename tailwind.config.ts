@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom Monapix colors
+				neon: {
+					green: 'hsl(var(--neon-green))',
+					blue: 'hsl(var(--neon-blue))'
+				},
+				'dark-bg': 'hsl(var(--dark-bg))',
+				'pixel-border': 'hsl(var(--pixel-border))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +92,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-neon': {
+					'0%, 100%': {
+						boxShadow: '0 0 5px hsl(var(--neon-green))'
+					},
+					'50%': {
+						boxShadow: '0 0 20px hsl(var(--neon-green)), 0 0 30px hsl(var(--neon-green))'
+					}
+				},
+				'slide-up': {
+					from: {
+						transform: 'translateY(100%)',
+						opacity: '0'
+					},
+					to: {
+						transform: 'translateY(0)',
+						opacity: '1'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-neon': 'pulse-neon 2s ease-in-out infinite',
+				'slide-up': 'slide-up 0.3s ease-out'
 			}
 		}
 	},
