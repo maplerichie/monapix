@@ -16,16 +16,16 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
   onPanReset,
 }) => {
   return (
-    <div className="absolute bottom-16 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-4 border border-neon-green/30">
+    <div className="absolute bottom-16 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-2 border border-neon-green/30">
       <div className="flex items-center gap-2 min-w-[200px]">
           <Button
-            size="sm"
+            size="icon"
             variant="outline"
             className="cyber-button p-2"
             onClick={() => onZoomChange(Math.max(100, zoom - 25))}
             disabled={zoom <= 100}
           >
-            <ZoomOut className="w-4 h-4" />
+            <ZoomOut/>
           </Button>
           
           <div className="flex-1">
@@ -33,20 +33,20 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
               value={[zoom]}
               onValueChange={(value) => onZoomChange(value[0])}
               min={100}
-              max={300}
+              max={500}
               step={25}
               className="w-full"
             />
           </div>
           
           <Button
-            size="sm"
+            size="icon"
             variant="outline"
             className="cyber-button p-2"
-            onClick={() => onZoomChange(Math.min(300, zoom + 25))}
-            disabled={zoom >= 300}
+            onClick={() => onZoomChange(Math.min(500, zoom + 25))}
+            disabled={zoom >= 500}
           >
-            <ZoomIn className="w-4 h-4" />
+            <ZoomIn/>
           </Button>
         </div>
     </div>
