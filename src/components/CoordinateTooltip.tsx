@@ -6,7 +6,7 @@ interface Pixel {
   y: number;
   color: string;
   owner?: string;
-  last_price: number;
+  last_price?: number;
   url?: string;
   image?: string;
 }
