@@ -22,7 +22,7 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
             size="icon"
             variant="outline"
             className="cyber-button p-2"
-            onClick={() => onZoomChange(Math.max(250, zoom - 25))}
+            onClick={() => onZoomChange(Math.max(250, zoom - 100))}
             disabled={zoom <= 250}
           >
             <ZoomOut/>
@@ -43,7 +43,7 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
             size="icon"
             variant="outline"
             className="cyber-button p-2"
-            onClick={() => onZoomChange(Math.min(2000, zoom + 25))}
+            onClick={() => onZoomChange(Math.min(2000, zoom + 100))}
             disabled={zoom >= 2000}
           >
             <ZoomIn/>
