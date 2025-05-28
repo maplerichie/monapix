@@ -17,7 +17,7 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
 }) => {
   return (
     <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-4 border border-neon-green/30">
-      <div className="flex flex-col gap-4 min-w-[200px]">
+      <div className="flex items-center gap-2 min-w-[200px]">
           <Button
             size="sm"
             variant="outline"
