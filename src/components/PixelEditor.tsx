@@ -192,12 +192,12 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
 
       if (needsResize) {
         fileToUpload = await resizeImage(file);
-        toast.success('Image resized to 128x128px');
+        // toast.success('Image resized to 128x128px');
       }
 
       const imageUrl = await uploadImageToStorage(fileToUpload);
       setUploadedImageUrl(imageUrl);
-      toast.success('Image uploaded successfully!');
+      // toast.success('Image uploaded successfully!');
     } catch (error) {
       toast.error('Failed to upload image');
       console.error('Image upload error:', error);
@@ -208,7 +208,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
 
   const handleRemoveImage = () => {
     setUploadedImageUrl(null);
-    toast.success('Image removed');
+    // toast.success('Image removed');
   };
 
   return (
