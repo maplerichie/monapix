@@ -16,9 +16,8 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
   onPanReset,
 }) => {
   return (
-    <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-sm rounded-lg p-4 border border-neon-green/30">
+    <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-4 border border-neon-green/30">
       <div className="flex flex-col gap-4 min-w-[200px]">
-        <div className="flex items-center gap-2">
           <Button
             size="sm"
             variant="outline"
@@ -50,11 +49,6 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
             <ZoomIn className="w-4 h-4" />
           </Button>
         </div>
-        
-        <div className="text-center text-neon-blue text-xs">
-          {zoom}%
-        </div>
-      </div>
     </div>
   );
 };

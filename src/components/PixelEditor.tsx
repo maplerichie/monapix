@@ -129,7 +129,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
         </DialogHeader>
 
         <Tabs defaultValue="color" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-gray-800">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-800">
             <TabsTrigger value="color">Color</TabsTrigger>
             <TabsTrigger value="image">Image</TabsTrigger>
           </TabsList>
