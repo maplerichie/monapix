@@ -6,7 +6,7 @@ interface Pixel {
   y: number;
   color: string;
   owner?: string;
-  price: number;
+  last_price: number;
   url?: string;
   image?: string;
 }
@@ -51,7 +51,7 @@ export const CoordinateTooltip: React.FC<CoordinateTooltipProps> = ({
               </div>
             )}
             <div className="text-yellow-400">
-              Price: {pixel.price.toFixed(2)} ETH
+              Price: {pixel.last_price.toFixed(2)} ETH
             </div>
           </>
         ) : (
