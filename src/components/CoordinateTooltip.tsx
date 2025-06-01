@@ -1,15 +1,6 @@
 
 import React from 'react';
-
-interface Pixel {
-  x: number;
-  y: number;
-  color: string;
-  image_url?: string;
-  link?: string;
-  owner_wallet?: string;
-  last_price?: number;
-}
+import { type Pixel } from '@/hooks/usePixelData';
 
 interface CoordinateTooltipProps {
   x: number;
@@ -47,12 +38,14 @@ export const CoordinateTooltip: React.FC<CoordinateTooltipProps> = ({
             </div>
             {pixel.owner_wallet && (
               <div className="text-primary-purple">
-                Owner: {pixel.owner_wallet}
+                Owner: {pixel.owner_wallet.slice(0, 6)}...{pixel.owner_wallet.slice(-4)}
               </div>
             )}
-            <div className="text-yellow-400">
-              Price: {pixel.last_price.toFixed(2)} ETH
-            </div>
+            {pixel.last_price && (
+              <div className="text-yellow-400">
+                Price: {pixel.last_price} ETH
+              </div>
+            )}
           </>
         ) : (
           <div className="text-gray-400">Available for mint</div>

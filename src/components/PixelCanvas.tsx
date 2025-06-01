@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { PixelEditor } from './PixelEditor';
+import { PixelInfoModal } from './PixelInfoModal';
 import { CanvasControls } from './CanvasControls';
 import { CoordinateTooltip } from './CoordinateTooltip';
 import { usePixelData, type Pixel } from '@/hooks/usePixelData';
@@ -11,6 +12,7 @@ export const PixelCanvas = () => {
   const [pan, setPan] = useState({ x: -100, y: -100 });
   const [hoveredPixel, setHoveredPixel] = useState<{ x: number; y: number } | null>(null);
   const [selectedPixel, setSelectedPixel] = useState<Pixel | null>(null);
+  const [viewingPixel, setViewingPixel] = useState<Pixel | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -150,6 +152,7 @@ export const PixelCanvas = () => {
         last_price: updatedPixel.last_price
       });
       setSelectedPixel(null);
+      setViewingPixel(null);
     } catch (error) {
       console.error('Error saving pixel:', error);
     }
@@ -207,15 +210,28 @@ export const PixelCanvas = () => {
       const pixelKey = `${coords.x},${coords.y}`;
       const existingPixel = pixels.get(pixelKey);
       
-      setSelectedPixel(existingPixel || {
-        pixel_id: coords.x * 1000 + coords.y,
-        x: coords.x,
-        y: coords.y,
-        color: '#ffffff',
-        last_price: 1,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
+      if (existingPixel) {
+        // Show info modal for existing pixels
+        setViewingPixel(existingPixel);
+      } else {
+        // Open editor for minting new pixel
+        setSelectedPixel({
+          pixel_id: coords.x * 1000 + coords.y,
+          x: coords.x,
+          y: coords.y,
+          color: '#ffffff',
+          last_price: 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      }
+    }
+  };
+
+  const handleEditPixel = () => {
+    if (viewingPixel) {
+      setSelectedPixel(viewingPixel);
+      setViewingPixel(null);
     }
   };
 
@@ -272,6 +288,14 @@ export const PixelCanvas = () => {
           pixelX={hoveredPixel.x}
           pixelY={hoveredPixel.y}
           pixel={pixels.get(`${hoveredPixel.x},${hoveredPixel.y}`)}
+        />
+      )}
+      
+      {viewingPixel && (
+        <PixelInfoModal
+          pixel={viewingPixel}
+          onClose={() => setViewingPixel(null)}
+          onEdit={handleEditPixel}
         />
       )}
       
