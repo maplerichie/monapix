@@ -60,9 +60,11 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
                   <Image className="w-3 h-3" />
                   {pixel.image_url}
                 </div>
-              ):(
+              ) : (
+      <>
               <div className="text-sm text-gray-400">Color</div>
               <div className="font-mono text-neon-green">{pixel.color}</div>
+      </>
               )}
             </div>
           </div>
