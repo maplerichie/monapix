@@ -19,12 +19,12 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
   onEdit,
 }) => {
   const { account, isConnected } = useWeb3();
-  
+
   if (!pixel) return null;
 
-  const isOwner = isConnected && account && pixel.owner_wallet && 
+  const isOwner = isConnected && account && pixel.owner_wallet &&
     account.toLowerCase() === pixel.owner_wallet.toLowerCase();
-  
+
   const isOwned = !!pixel.owner_wallet;
 
   return (
@@ -40,25 +40,24 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
         <div className="space-y-4">
           {/* Pixel Preview */}
           <div className="flex w-128 h-128 gap-4 p-4 rounded-lg">
-              {pixel.image_url ? (
-                <img 
-                  src={pixel.image_url} 
-                  alt="Pixel" 
-                  className="w-full h-full border-2 border-neon-green/50 object-cover rounded justify-items-center"
-                />
-              ) : (
-      <div className="flex">
-                <div 
+            {pixel.image_url ? (
+              <img
+                src={pixel.image_url}
+                alt="Pixel"
+                className="w-full h-full border-2 border-neon-green/50 object-cover rounded justify-items-center"
+              />
+            ) : (
+              <div className="flex">
+                <div
                   className="w-full h-full rounded"
                   style={{ backgroundColor: pixel.color }}
                 />
-        <div className="flex-1">
-              <div className="text-sm text-gray-400">Color</div>
-              <div className="font-mono text-neon-green">{pixel.color}</div>
-        </div>
-      </div>
-              )}
-            </div>
+                <div className="flex-1">
+                  <div className="text-sm text-gray-400">Color</div>
+                  <div className="font-mono text-neon-green">{pixel.color}</div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Ownership Status */}
@@ -74,10 +73,10 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
                   <div className="text-gray-400">Owner:</div>
                   <div className="font-mono text-purple-400">
                     {pixel.owner_wallet?.slice(0, 6)}...{pixel.owner_wallet?.slice(-4)}{isOwner && (
-                  <div className="text-xs text-green-400 pl-4">
-                    You!
-                  </div>
-                )} 
+                      <div className="text-xs text-green-400 pl-4">
+                        You!
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -102,9 +101,9 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
           {pixel.link && (
             <div className="space-y-1">
               <div className="text-sm text-gray-400">Link</div>
-              <a 
-                href={pixel.link} 
-                target="_blank" 
+              <a
+                href={pixel.link}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 flex items-center gap-1 text-sm break-all"
               >
@@ -148,7 +147,7 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
               {isConnected ? 'Owned by another user' : 'Connect wallet to interact'}
             </div>
           )}
-          
+
           <Button
             onClick={onClose}
             variant="outline"
@@ -158,6 +157,6 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
           </Button>
         </div>
       </DialogContent>
-    </Dialog>
+    </Dialog >
   );
 };
