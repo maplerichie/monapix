@@ -39,20 +39,20 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
 
         <div className="space-y-4">
           {/* Pixel Preview */}
-          <div className="flex w-64 h-64 gap-4 p-4 rounded-lg">
+          <div className="flex w-48 h-48 gap-4 p-4 rounded-lg justify-center">
             {pixel.image_url ? (
               <img
                 src={pixel.image_url}
                 alt="Pixel"
-                className="w-full h-full border-2 border-neon-green/50 object-cover rounded justify-items-center"
+                className="w-full h-full border-2 border-neon-green/50 object-cover rounded"
               />
             ) : (
               <div className="flex">
                 <div
-                  className="w-64 h-64 rounded"
+                  className="w-48 h-48 rounded"
                   style={{ backgroundColor: pixel.color }}
                 />
-                <div className="flex-1">
+                <div className="flex-1 pl-4">
                   <div className="text-sm text-gray-400">Color</div>
                   <div className="font-mono text-neon-green">{pixel.color}</div>
                 </div>
