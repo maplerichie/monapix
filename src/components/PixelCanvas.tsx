@@ -3,7 +3,7 @@ import { PixelEditor } from './PixelEditor';
 import { PixelInfoModal } from './PixelInfoModal';
 import { CanvasControls } from './CanvasControls';
 import { CoordinateTooltip } from './CoordinateTooltip';
-import { usePixelData, type Pixel } from '@/hooks/usePixelData';
+import { Transaction, usePixelData, type Pixel } from '@/hooks/usePixelData';
 
 export const PixelCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -18,7 +18,7 @@ export const PixelCanvas = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
-  const { pixels, loading, fetchPixels, savePixel } = usePixelData();
+  const { pixels, loading, fetchPixels, savePixel, createTransaction } = usePixelData();
 
   // Initialize by fetching pixels
   useEffect(() => {
@@ -57,8 +57,8 @@ export const PixelCanvas = () => {
     const pixelSize = (zoom / 100) * 2;
 
     // Draw grid
-    ctx.strokeStyle = '#2a2a3e';
-    ctx.lineWidth = 0.5;
+    ctx.strokeStyle = '#fafafa';
+    ctx.lineWidth = 0.1;
 
     for (let x = 0; x < 256; x++) {
       const canvasX = x * pixelSize + pan.x;
@@ -157,6 +157,11 @@ export const PixelCanvas = () => {
     } catch (error) {
       console.error('Error saving pixel:', error);
     }
+  };
+
+  const handleTransaction = async (transaction: Omit<Transaction, 'id' | 'created_at'>) => {
+    await createTransaction(transaction);
+    return Promise.resolve();
   };
 
   const getPixelCoordinates = (clientX: number, clientY: number) => {
@@ -306,6 +311,7 @@ export const PixelCanvas = () => {
           pixel={selectedPixel}
           onSave={handlePixelSave}
           onClose={() => setSelectedPixel(null)}
+          createTransaction={handleTransaction}
         />
       )}
     </div>

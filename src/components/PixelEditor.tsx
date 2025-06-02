@@ -8,21 +8,22 @@ import { Palette, Upload, Link, Asterisk, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAccount, useConnect } from 'wagmi';
-import { type Pixel } from '@/hooks/usePixelData';
+import { Transaction, type Pixel } from '@/hooks/usePixelData';
 import { Slider } from '@/components/ui/slider';
 import { useMintPixel, usePurchasePixel } from '@/lib/monapixContract';
-import { usePixelData } from '@/hooks/usePixelData';
 
 interface PixelEditorProps {
   pixel: Pixel;
   onSave: (pixel: Pixel) => void;
   onClose: () => void;
+  createTransaction: (transaction: Omit<Transaction, 'id' | 'created_at'>) => Promise<void>;
 }
 
 export const PixelEditor: React.FC<PixelEditorProps> = ({
   pixel,
   onSave,
   onClose,
+  createTransaction,
 }) => {
   const DAY_IN_SECONDS = 10; // 24 * 60 * 60;
   const LOCK_BONUS = 0.2;
@@ -38,7 +39,6 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
 
   const { connect, connectors } = useConnect();
   const { address: account, isConnected } = useAccount();
-  const { createTransaction } = usePixelData();
 
   const presetColors = [
     '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff',
