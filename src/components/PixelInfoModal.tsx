@@ -47,7 +47,7 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
                 className="w-full h-full border-2 border-neon-green/50 object-cover rounded"
               />
             ) : (
-              <div className="flex">
+              <div className="w-full h-full">
                 <div
                   className="w-48 h-48 rounded"
                   style={{ backgroundColor: pixel.color }}
