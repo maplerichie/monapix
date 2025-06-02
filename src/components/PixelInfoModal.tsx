@@ -33,11 +33,8 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
         <DialogHeader>
           <DialogTitle className="text-neon-green glow-effect flex items-center gap-2">
             <Palette className="w-5 h-5" />
-            PIXEL INFO
+            ({pixel.x}, {pixel.y})
           </DialogTitle>
-          <div className="text-sm text-neon-blue">
-            Position: ({pixel.x}, {pixel.y})
-          </div>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -58,14 +55,15 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
               )}
             </div>
             <div className="flex-1">
-              <div className="text-sm text-gray-400">Color</div>
-              <div className="font-mono text-neon-green">{pixel.color}</div>
-              {pixel.image_url && (
+              {pixel.image_url ？ (
                 <div className="flex items-center gap-1 text-xs text-blue-400 mt-1">
                   <Image className="w-3 h-3" />
-                  Custom Image
+                  {pixel.image_url}
                 </div>
-              )}
+              ) ： （
+              <div className="text-sm text-gray-400">Color</div>
+              <div className="font-mono text-neon-green">{pixel.color}</div>
+              ）}
             </div>
           </div>
 
@@ -81,14 +79,13 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
                 <div className="text-xs">
                   <div className="text-gray-400">Owner:</div>
                   <div className="font-mono text-purple-400">
-                    {pixel.owner_wallet?.slice(0, 6)}...{pixel.owner_wallet?.slice(-4)}
+                    {pixel.owner_wallet?.slice(0, 6)}...{pixel.owner_wallet?.slice(-4)}{isOwner && (
+                  <div className="text-xs text-green-400 pl-4">
+                    You!
+                  </div>
+                )} 
                   </div>
                 </div>
-                {isOwner && (
-                  <div className="text-xs text-green-400">
-                    ✓ You own this pixel
-                  </div>
-                )}
               </div>
             ) : (
               <Badge variant="outline" className="border-green-500 text-green-400">
