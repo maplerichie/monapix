@@ -33,7 +33,7 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
             value={[zoom]}
             onValueChange={(value) => onZoomChange(value[0])}
             min={200}
-            max={4000}
+            max={5000}
             step={50}
             className="w-full"
           />
@@ -43,25 +43,11 @@ export const CanvasControls: React.FC<CanvasControlsProps> = ({
           size="icon"
           variant="outline"
           className="p-2 border-primary-purple/50"
-          onClick={() => onZoomChange(Math.min(4000, zoom * 1.25))}
-          disabled={zoom >= 4000}
+          onClick={() => onZoomChange(Math.min(5000, zoom * 1.25))}
+          disabled={zoom >= 5000}
         >
           <ZoomIn className="w-4 h-4" />
         </Button>
-
-        <Button
-          size="icon"
-          variant="outline"
-          className="p-2 border-primary-purple/50"
-          onClick={onPanReset}
-          title="Center view"
-        >
-          <Target className="w-4 h-4" />
-        </Button>
-      </div>
-      
-      <div className="text-xs text-gray-400 text-center mt-2">
-        {Math.round(zoom / 10)}% zoom
       </div>
     </div>
   );

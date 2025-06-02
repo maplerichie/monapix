@@ -22,7 +22,7 @@ export const calculateViewportBounds = (
   zoom: number
 ): ViewportBounds => {
   const pixelSize = (zoom / 100) * 2;
-  
+
   return {
     minX: Math.floor(-pan.x / pixelSize) - 1,
     maxX: Math.ceil((canvasWidth - pan.x) / pixelSize) + 1,
@@ -33,45 +33,45 @@ export const calculateViewportBounds = (
 
 export const getGridSettings = (zoom: number): GridSettings => {
   const pixelSize = (zoom / 100) * 2;
-  
+
   if (pixelSize < 2) {
     // Very zoomed out - show major grid only
     return {
-      majorGrid: 16,
+      majorGrid: 8,
       minorGrid: 0,
-      majorOpacity: 0.2,
+      majorOpacity: 0.1,
       minorOpacity: 0,
-      majorLineWidth: 0.5,
+      majorLineWidth: 0.25,
       minorLineWidth: 0
     };
   } else if (pixelSize < 8) {
     // Medium zoom - show reduced grid
     return {
-      majorGrid: 8,
+      majorGrid: 4,
       minorGrid: 0,
-      majorOpacity: 0.3,
+      majorOpacity: 0.2,
       minorOpacity: 0,
-      majorLineWidth: 0.5,
+      majorLineWidth: 0.25,
       minorLineWidth: 0
     };
   } else if (pixelSize < 16) {
     // Getting closer - show 4x4 grid
     return {
-      majorGrid: 4,
+      majorGrid: 2,
       minorGrid: 1,
-      majorOpacity: 0.4,
+      majorOpacity: 0.3,
       minorOpacity: 0.1,
-      majorLineWidth: 0.8,
+      majorLineWidth: 0.5,
       minorLineWidth: 0.3
     };
   } else {
     // Close zoom - show full grid
     return {
-      majorGrid: 4,
+      majorGrid: 1,
       minorGrid: 1,
-      majorOpacity: 0.5,
+      majorOpacity: 0.4,
       minorOpacity: 0.2,
-      majorLineWidth: 1,
+      majorLineWidth: 0.5,
       minorLineWidth: 0.5
     };
   }
@@ -95,15 +95,15 @@ export const constrainPan = (
   const pixelSize = (zoom / 100) * 2;
   const gridWidth = 256 * pixelSize;
   const gridHeight = 256 * pixelSize;
-  
+
   // Allow some padding beyond grid boundaries
   const padding = Math.min(canvasWidth, canvasHeight) * 0.5;
-  
+
   const minX = Math.min(-padding, canvasWidth - gridWidth - padding);
   const maxX = Math.max(padding, canvasWidth - padding);
   const minY = Math.min(-padding, canvasHeight - gridHeight - padding);
   const maxY = Math.max(padding, canvasHeight - padding);
-  
+
   return {
     x: Math.max(minX, Math.min(maxX, pan.x)),
     y: Math.max(minY, Math.min(maxY, pan.y))
