@@ -41,11 +41,6 @@ export const CoordinateTooltip: React.FC<CoordinateTooltipProps> = ({
                 Owner: {pixel.owner_wallet.slice(0, 6)}...{pixel.owner_wallet.slice(-4)}
               </div>
             )}
-            {pixel.last_price && (
-              <div className="text-yellow-400">
-                Price: {pixel.last_price} ETH
-              </div>
-            )}
           </>
         ) : (
           <div className="text-gray-400">Available for mint</div>

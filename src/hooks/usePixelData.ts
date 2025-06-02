@@ -11,7 +11,8 @@ export interface Pixel {
   image_url?: string;
   link?: string;
   owner_wallet?: string;
-  last_price?: number;
+  price?: number;
+  unlocked_at: number;
   created_at: string;
   updated_at: string;
 }
@@ -98,9 +99,9 @@ export const usePixelData = () => {
         x: coords.x,
         y: coords.y
       };
-      
+
       setPixels(prev => new Map(prev.set(`${x},${y}`, updatedPixel)));
-      
+
       return result;
     } catch (error) {
       console.error('Error saving pixel:', error);
@@ -139,7 +140,7 @@ export const usePixelData = () => {
         },
         (payload) => {
           console.log('Real-time pixel update:', payload);
-          
+
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             const pixel = payload.new as Pixel;
             const coords = getCoordinatesFromId(pixel.pixel_id);
@@ -148,9 +149,9 @@ export const usePixelData = () => {
               x: coords.x,
               y: coords.y
             };
-            
+
             setPixels(prev => new Map(prev.set(`${coords.x},${coords.y}`, pixelWithCoords)));
-            
+
             if (payload.eventType === 'INSERT') {
               toast.success(`Pixel minted at (${coords.x}, ${coords.y})`);
             }

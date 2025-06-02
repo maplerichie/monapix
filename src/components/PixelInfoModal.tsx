@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,9 +26,35 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
 
   const isOwned = !!pixel.owner_wallet;
 
+  // Lock/Unlock logic (unlocked_at is in seconds)
+  const now = Math.floor(Date.now() / 1000);
+  const isLocked = pixel.unlocked_at && now < pixel.unlocked_at;
+  const [countdown, setCountdown] = useState(
+    isLocked ? Math.max(0, pixel.unlocked_at - now) : 0
+  );
+
+  useEffect(() => {
+    if (!isLocked) return;
+    const interval = setInterval(() => {
+      const nowSec = Math.floor(Date.now() / 1000);
+      setCountdown(Math.max(0, pixel.unlocked_at - nowSec));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [pixel.unlocked_at, isLocked]);
+
+  function formatCountdown(sec: number) {
+    if (sec <= 0) return 'Unlocked';
+    const hours = Math.floor(sec / 3600);
+    const minutes = Math.floor((sec % 3600) / 60);
+    const seconds = sec % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-md bg-black/95 border-neon-green text-white">
+      <DialogContent className="max-w-md min-w-96 w-auto bg-black/95 border-neon-green text-white">
         <DialogHeader>
           <DialogTitle className="text-neon-green glow-effect flex items-center gap-2">
             <Palette className="w-5 h-5" />
@@ -39,89 +64,66 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
 
         <div className="space-y-4">
           {/* Pixel Preview */}
-          <div className="flex w-48 h-48 gap-4 p-4 rounded-lg justify-center">
+          <div className="flex gap-4 justify-center">
             {pixel.image_url ? (
               <img
                 src={pixel.image_url}
                 alt="Pixel"
-                className="w-full h-full border-2 border-neon-green/50 object-cover rounded"
+                className="w-48 h-48 object-cover rounded-lg"
               />
             ) : (
-              <div className="w-full h-full">
-                <div
-                  className="w-48 h-48 rounded"
-                  style={{ backgroundColor: pixel.color }}
-                />
-                <div className="flex-1 pl-4">
-                  <div className="text-sm text-gray-400">Color</div>
-                  <div className="font-mono text-neon-green">{pixel.color}</div>
-                </div>
+              <div
+                className="w-48 h-48 border-2 border-neon-green/50 rounded-lg content-center text-center text-white"
+                style={{ backgroundColor: pixel.color }}
+              >
+                {pixel.color}
               </div>
             )}
           </div>
-
-          {/* Ownership Status */}
-          <div className="space-y-2">
-            <div className="text-sm text-gray-400">Status</div>
-            {isOwned ? (
-              <div className="space-y-2">
-                <Badge variant="secondary" className="bg-purple-600 text-white">
-                  <User className="w-3 h-3 mr-1" />
-                  Owned
-                </Badge>
-                <div className="text-xs">
-                  <div className="text-gray-400">Owner:</div>
-                  <div className="font-mono text-purple-400">
-                    {pixel.owner_wallet?.slice(0, 6)}...{pixel.owner_wallet?.slice(-4)}{isOwner && (
-                      <div className="text-xs text-green-400 pl-4">
-                        You!
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <Badge variant="outline" className="border-green-500 text-green-400">
-                Available for Mint
-              </Badge>
-            )}
-          </div>
-
-          {/* Price */}
-          {pixel.last_price && (
-            <div className="space-y-1">
-              <div className="text-sm text-gray-400">Last Price</div>
-              <div className="text-lg font-bold text-yellow-400">
-                {pixel.last_price} ETH
-              </div>
-            </div>
-          )}
 
           {/* Link */}
           {pixel.link && (
-            <div className="space-y-1">
-              <div className="text-sm text-gray-400">Link</div>
-              <a
-                href={pixel.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 flex items-center gap-1 text-sm break-all"
-              >
-                {pixel.link}
-                <ExternalLink className="w-3 h-3 flex-shrink-0" />
-              </a>
-            </div>
+            <a
+              href={pixel.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 flex items-center justify-center"
+            >
+              {pixel.link}&nbsp;<ExternalLink className="w-3 h-3" />
+            </a>
           )}
 
-          {/* Timestamps */}
-          <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
-            <div>
-              <div>Created</div>
-              <div>{new Date(pixel.created_at).toLocaleDateString()}</div>
+          {/* Owner */}
+          <div>
+            <div className="text-sm text-gray-400">Owned by <span className="font-mono text-purple-400">
+              {pixel.owner_wallet?.slice(0, 6)}...{pixel.owner_wallet?.slice(-4)}{isOwner && (
+                <span className="text-xs text-green-400 pl-2">(It's you!)</span>
+              )}</span>
             </div>
+          </div>
+
+          {/* Status & Last Price Grid */}
+          <div className="grid grid-cols-2 gap-4 text-xs text-gray-300">
+            {/* Status */}
+            <div className="flex flex-col gap-1">
+              <div className="text-sm text-gray-400">Status</div>
+              {isLocked ? (
+                <Badge variant="destructive" className="bg-orange-600 text-white max-w-fit">
+                  Unlocks in: {formatCountdown(countdown)}
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="bg-green-600 text-white max-w-fit">
+                  <User className="w-3 h-3 mr-1" />
+                  Unlocked
+                </Badge>
+              )}
+            </div>
+            {/* Last Price */}
             <div>
-              <div>Updated</div>
-              <div>{new Date(pixel.updated_at).toLocaleDateString()}</div>
+              <div className="text-sm text-gray-400">Last Price</div>
+              <div className="text-lg font-bold text-yellow-400">
+                {pixel.price ? `${pixel.price} ETH` : '-'}
+              </div>
             </div>
           </div>
         </div>
@@ -132,21 +134,12 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
             <Button
               onClick={onEdit}
               className="cyber-button flex-1"
+              disabled={isLocked}
             >
-              Edit Pixel
+              Edit{isLocked && ' (Locked)'}
             </Button>
-          ) : !isOwned ? (
-            <Button
-              onClick={onEdit}
-              className="cyber-button flex-1"
-            >
-              Mint Pixel
-            </Button>
-          ) : (
-            <div className="flex-1 text-center text-sm text-gray-400 py-2">
-              {isConnected ? 'Owned by another user' : 'Connect wallet to interact'}
-            </div>
-          )}
+          ) : <div className="flex-1"></div>
+          }
 
           <Button
             onClick={onClose}

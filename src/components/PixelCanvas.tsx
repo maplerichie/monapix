@@ -59,7 +59,7 @@ export const PixelCanvas = () => {
     // Draw grid
     ctx.strokeStyle = '#2a2a3e';
     ctx.lineWidth = 0.5;
-    
+
     for (let x = 0; x < 256; x++) {
       const canvasX = x * pixelSize + pan.x;
       if (canvasX >= -pixelSize && canvasX <= canvas.width) {
@@ -69,7 +69,7 @@ export const PixelCanvas = () => {
         ctx.stroke();
       }
     }
-    
+
     for (let y = 0; y < 256; y++) {
       const canvasY = y * pixelSize + pan.y;
       if (canvasY >= -pixelSize && canvasY <= canvas.height) {
@@ -84,10 +84,10 @@ export const PixelCanvas = () => {
     pixels.forEach((pixel) => {
       const canvasX = pixel.x * pixelSize + pan.x;
       const canvasY = pixel.y * pixelSize + pan.y;
-      
-      if (canvasX >= -pixelSize && canvasX <= canvas.width && 
-          canvasY >= -pixelSize && canvasY <= canvas.height) {
-        
+
+      if (canvasX >= -pixelSize && canvasX <= canvas.width &&
+        canvasY >= -pixelSize && canvasY <= canvas.height) {
+
         // Check if pixel has image and image is loaded
         if (pixel.image_url && imageCache.has(pixel.image_url)) {
           const img = imageCache.get(pixel.image_url)!;
@@ -97,7 +97,7 @@ export const PixelCanvas = () => {
           ctx.fillStyle = pixel.color;
           ctx.fillRect(canvasX, canvasY, pixelSize, pixelSize);
         }
-        
+
         if (pixel.owner_wallet) {
           ctx.strokeStyle = '#836EF9';
           ctx.lineWidth = 1;
@@ -110,7 +110,7 @@ export const PixelCanvas = () => {
     if (hoveredPixel) {
       const canvasX = hoveredPixel.x * pixelSize + pan.x;
       const canvasY = hoveredPixel.y * pixelSize + pan.y;
-      
+
       ctx.strokeStyle = '#00ffff';
       ctx.lineWidth = 2;
       ctx.strokeRect(canvasX, canvasY, pixelSize, pixelSize);
@@ -149,7 +149,7 @@ export const PixelCanvas = () => {
         image_url: updatedPixel.image_url,
         link: updatedPixel.link,
         owner_wallet: updatedPixel.owner_wallet,
-        last_price: updatedPixel.last_price
+        price: updatedPixel.price
       });
       setSelectedPixel(null);
       setViewingPixel(null);
@@ -204,12 +204,12 @@ export const PixelCanvas = () => {
 
   const handleClick = (e: React.MouseEvent) => {
     if (isDragging) return;
-    
+
     const coords = getPixelCoordinates(e.clientX, e.clientY);
     if (coords) {
       const pixelKey = `${coords.x},${coords.y}`;
       const existingPixel = pixels.get(pixelKey);
-      
+
       if (existingPixel) {
         // Show info modal for existing pixels
         setViewingPixel(existingPixel);
@@ -220,7 +220,7 @@ export const PixelCanvas = () => {
           x: coords.x,
           y: coords.y,
           color: '#ffffff',
-          last_price: 1,
+          price: 1,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });
@@ -274,13 +274,13 @@ export const PixelCanvas = () => {
         onClick={handleClick}
         onWheel={handleWheel}
       />
-      
+
       <CanvasControls
         zoom={zoom}
         onZoomChange={handleZoomChange}
         onPanReset={handlePanReset}
       />
-      
+
       {hoveredPixel && (
         <CoordinateTooltip
           x={mousePos.x}
@@ -290,7 +290,7 @@ export const PixelCanvas = () => {
           pixel={pixels.get(`${hoveredPixel.x},${hoveredPixel.y}`)}
         />
       )}
-      
+
       {viewingPixel && (
         <PixelInfoModal
           pixel={viewingPixel}
@@ -298,7 +298,7 @@ export const PixelCanvas = () => {
           onEdit={handleEditPixel}
         />
       )}
-      
+
       {selectedPixel && (
         <PixelEditor
           pixel={selectedPixel}
