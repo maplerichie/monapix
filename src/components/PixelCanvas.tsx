@@ -27,6 +27,7 @@ export const PixelCanvas = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
   const [isInitialized, setIsInitialized] = useState(false);
+  const draggedRef = useRef(false);
 
   const { animate, stop } = useSmoothAnimation();
   const { pixels, loading, fetchPixels, savePixel, createTransaction } = usePixelData();
@@ -260,6 +261,11 @@ export const PixelCanvas = () => {
       const deltaX = e.clientX - dragStart.x;
       const deltaY = e.clientY - dragStart.y;
 
+      // If moved more than 4px, consider as drag
+      if (!draggedRef.current && (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4)) {
+        draggedRef.current = true;
+      }
+
       // Track momentum for smooth release
       setDragMomentum({ x: deltaX * 0.1, y: deltaY * 0.1 });
 
@@ -286,6 +292,7 @@ export const PixelCanvas = () => {
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
     setDragMomentum({ x: 0, y: 0 });
+    draggedRef.current = false;
   };
 
   const handleMouseUp = () => {
@@ -320,7 +327,7 @@ export const PixelCanvas = () => {
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    if (isDragging) return;
+    if (isDragging || draggedRef.current) return;
 
     const coords = getPixelCoordinates(e.clientX, e.clientY);
     if (coords) {
@@ -438,6 +445,7 @@ export const PixelCanvas = () => {
         onMouseLeave={() => {
           setHoveredPixel(null);
           setIsDragging(false);
+          draggedRef.current = true;
         }}
         onClick={handleClick}
         onWheel={handleWheel}

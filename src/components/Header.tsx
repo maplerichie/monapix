@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { Wallet, User, Grid3X3 } from 'lucide-react';
+import { Wallet, User, Grid3X3, HelpCircle } from 'lucide-react';
 import { useAccount, useDisconnect, useConnect } from 'wagmi';
 import { useTotalSupply } from '@/lib/monapixContract';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 export const Header = () => {
   const { address: account, isConnected } = useAccount();
@@ -25,6 +26,33 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" className="text-neon-green neon-border flex items-center gap-1">
+                  <HelpCircle className="w-4 h-4" />
+                  How to Play
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md min-w-80 w-auto bg-black/95 border-neon-green neon-border shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)] text-white">
+                <DialogHeader>
+                  <DialogTitle className="text-neon-green glow-effect flex items-center gap-2">
+                    <HelpCircle className="w-5 h-5 text-neon-green" />
+                    How to Play
+                  </DialogTitle>
+                </DialogHeader>
+                <DialogDescription asChild>
+                  <div className="text-neon-blue text-base pt-2 space-y-3">
+                    <ul className="list-disc pl-5 space-y-2">
+                      <li>Each pixel is an NFT, starting at 1 MON.</li>
+                      <li>When you mint, set a lock duration (1-7 days). Each day adds +0.2 MON to the resell price.</li>
+                      <li>After the pixel is unlocked, anyone can buy your pixel instantly at the resell price.</li>
+                      <li>Owner not required to list for sale; unlocked pixels are always available for purchase.</li>
+                      <li>More to come...</li>
+                    </ul>
+                  </div>
+                </DialogDescription>
+              </DialogContent>
+            </Dialog>
             <div className="hidden md:flex items-center gap-4 text-sm">
               <div className="text-neon-blue">
                 From: <span className="text-neon-green font-bold">1.0 MON</span>
