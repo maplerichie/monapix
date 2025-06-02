@@ -79,11 +79,7 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
                 <div className="text-xs">
                   <div className="text-gray-400">Owner:</div>
                   <div className="font-mono text-purple-400">
-                    {pixel.owner_wallet?.slice(0, 6)}...{pixel.owner_wallet?.slice(-4)}{isOwner && (
-                  <div className="text-xs text-green-400 pl-4">
-                    You!
-                  </div>
-                )} 
+                    {pixel.owner_wallet?.slice(0, 6)}...{pixel.owner_wallet?.slice(-4)}
                   </div>
                 </div>
               </div>
