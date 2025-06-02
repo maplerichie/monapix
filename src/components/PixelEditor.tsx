@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Palette, Upload, Link, Asterisk, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useAccount } from 'wagmi';
+import { useAccount, useConnect } from 'wagmi';
 import { type Pixel } from '@/hooks/usePixelData';
 import { Slider } from '@/components/ui/slider';
 import { useMintPixel, usePurchasePixel } from '@/lib/monapixContract';
@@ -36,6 +36,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
   const resellPrice = +(basePrice + lockPeriod * LOCK_BONUS).toFixed(2);
   const unlockDate = new Date(Date.now() + lockPeriod * DAY_IN_SECONDS * 1000);
 
+  const { connect, connectors } = useConnect();
   const { address: account, isConnected } = useAccount();
   const { createTransaction } = usePixelData();
 
@@ -98,7 +99,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
         toast.success(`Pixel ${action === 'mint' ? 'minted' : 'purchased'} for ${pixel.price || 1} MON!`);
       }
     } catch (error: any) {
-      toast.error(`${action === 'mint' ? 'Mint' : 'Purchase'} failed: ${error?.details || error}`);
+      toast.error(`${action === 'mint' ? 'Mint' : 'Purchase'} failed: ${error?.details || error?.message || error}`);
     } finally {
       setIsProcessing(false);
     }
@@ -341,7 +342,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
         <div className="flex gap-2 pt-4">
           {!isConnected ? (
             <Button
-              onClick={() => toast.error('Please use the Connect Wallet button in the header.')}
+              onClick={() => connect({ connector: connectors[0] })}
               className="flex-1"
             >
               Connect Wallet
