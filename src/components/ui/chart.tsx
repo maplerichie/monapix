@@ -50,7 +50,7 @@ const ChartContainer = React.forwardRef<
         data-chart={chartId}
         ref={ref}
         className={cn(
-          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+          "flex aspect-video justify-center text-xs neon-border shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)] bg-black/90 text-neon-green [&_.recharts-cartesian-axis-tick_text]:fill-neon-blue [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-neon-green/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-neon-green [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-neon-green [&_.recharts-radial-bar-background-sector]:fill-neon-blue/30 [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-neon-blue/30 [&_.recharts-reference-line_[stroke='#ccc']]:stroke-neon-green [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
           className
         )}
         {...props}
@@ -82,13 +82,13 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
             ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
-  })
-  .join("\n")}
+                .map(([key, itemConfig]) => {
+                  const color =
+                    itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+                    itemConfig.color
+                  return color ? `  --color-${key}: ${color};` : null
+                })
+                .join("\n")}
 }
 `
           )
@@ -103,13 +103,13 @@ const ChartTooltip = RechartsPrimitive.Tooltip
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-    React.ComponentProps<"div"> & {
-      hideLabel?: boolean
-      hideIndicator?: boolean
-      indicator?: "line" | "dot" | "dashed"
-      nameKey?: string
-      labelKey?: string
-    }
+  React.ComponentProps<"div"> & {
+    hideLabel?: boolean
+    hideIndicator?: boolean
+    indicator?: "line" | "dot" | "dashed"
+    nameKey?: string
+    labelKey?: string
+  }
 >(
   (
     {
@@ -177,7 +177,7 @@ const ChartTooltipContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl",
+          "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-neon-green bg-black/95 px-2.5 py-1.5 text-xs shadow-xl neon-border text-neon-green",
           className
         )}
       >
@@ -259,10 +259,10 @@ const ChartLegend = RechartsPrimitive.Legend
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> &
-    Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
-      hideIcon?: boolean
-      nameKey?: string
-    }
+  Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+    hideIcon?: boolean
+    nameKey?: string
+  }
 >(
   (
     { className, hideIcon = false, payload, verticalAlign = "bottom", nameKey },
@@ -326,8 +326,8 @@ function getPayloadConfigFromPayload(
 
   const payloadPayload =
     "payload" in payload &&
-    typeof payload.payload === "object" &&
-    payload.payload !== null
+      typeof payload.payload === "object" &&
+      payload.payload !== null
       ? payload.payload
       : undefined
 

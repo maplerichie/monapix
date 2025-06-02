@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 @tailwind base;
 @tailwind components;
@@ -15,35 +14,35 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 258 89% 70%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 200 100% 50%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 258 80% 20%;
+    --muted-foreground: 215.4 16.3% 70%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 120 100% 50%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 258 89% 70%;
+    --input: 258 89% 70%;
+    --ring: 120 100% 50%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 258 100% 16%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 258 89% 70%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 120 100% 50%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 258 89% 70%;
+    --sidebar-ring: 120 100% 50%;
 
     /* Custom Monapix variables - Updated Theme */
     --neon-green: 120 100% 50%;
@@ -51,36 +50,37 @@
     --dark-bg: 258 100% 16%;
     --pixel-border: 0 0% 20%;
     --primary-purple: 258 89% 70%;
+    --neon-shadow: 0 0 20px hsl(var(--neon-green) / 0.7);
   }
 
   .dark {
     --background: 258 100% 16%;
-    --foreground: 210 40% 98%;
+    --foreground: 0 0% 100%;
     --card: 258 100% 16%;
-    --card-foreground: 210 40% 98%;
+    --card-foreground: 0 0% 100%;
     --popover: 258 100% 16%;
-    --popover-foreground: 210 40% 98%;
+    --popover-foreground: 0 0% 100%;
     --primary: 258 89% 70%;
-    --primary-foreground: 258 100% 16%;
-    --secondary: 258 80% 20%;
-    --secondary-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 200 100% 50%;
+    --secondary-foreground: 0 0% 100%;
     --muted: 258 80% 20%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 258 80% 20%;
-    --accent-foreground: 210 40% 98%;
+    --muted-foreground: 215 20.2% 80%;
+    --accent: 120 100% 50%;
+    --accent-foreground: 0 0% 0%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 258 80% 20%;
-    --input: 258 80% 20%;
-    --ring: 258 89% 70%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 258 89% 70%;
+    --input: 258 89% 70%;
+    --ring: 120 100% 50%;
     --sidebar-background: 258 100% 16%;
-    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 258 89% 70%;
-    --sidebar-primary-foreground: 258 100% 16%;
-    --sidebar-accent: 258 80% 20%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 258 80% 20%;
-    --sidebar-ring: 258 89% 70%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 120 100% 50%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 258 89% 70%;
+    --sidebar-ring: 120 100% 50%;
   }
 }
 
@@ -104,22 +104,11 @@
   }
 
   .neon-border {
-    border: 2px solid hsl(var(--primary-purple));
-    box-shadow: 0 0 10px hsl(var(--primary-purple) / 0.5);
+    border: 2px solid hsl(var(--neon-green));
+    box-shadow: var(--neon-shadow);
   }
 
   .glow-effect {
-    text-shadow: 0 0 10px hsl(var(--primary-purple));
-  }
-
-  .cyber-button {
-    background: linear-gradient(45deg, hsl(var(--primary-purple) / 0.2), hsl(var(--neon-blue) / 0.2));
-    border: 1px solid hsl(var(--primary-purple));
-    transition: all 0.3s ease;
-  }
-
-  .cyber-button:hover {
-    background: linear-gradient(45deg, hsl(var(--primary-purple) / 0.4), hsl(var(--neon-blue) / 0.4));
-    box-shadow: 0 0 15px hsl(var(--primary-purple) / 0.6);
+    text-shadow: 0 0 10px hsl(var(--primary-purple)), 0 0 20px hsl(var(--neon-green) / 0.7);
   }
 }

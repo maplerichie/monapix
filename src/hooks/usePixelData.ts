@@ -20,7 +20,7 @@ export interface Pixel {
 export interface Transaction {
   id: string;
   pixel_id: number;
-  transaction_type: 'mint' | 'transfer' | 'update';
+  transaction_type: 'mint' | 'purchase';
   from_wallet?: string;
   to_wallet?: string;
   transaction_hash: string;

@@ -1,48 +1,50 @@
-
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Wallet, User, Grid3X3 } from 'lucide-react';
-import { useWeb3 } from '@/contexts/Web3Context';
+import { useAccount, useDisconnect, useConnect } from 'wagmi';
+import { useTotalSupply } from '@/lib/monapixContract';
 
 export const Header = () => {
-  const { account, isConnected, isConnecting, connectWallet, disconnectWallet } = useWeb3();
+  const { address: account, isConnected } = useAccount();
+  const { connectors, connect } = useConnect()
+  const { disconnect } = useDisconnect();
+  const { data: totalSupply } = useTotalSupply();
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-sm border-b border-primary-purple/30">
+    <header className="absolute top-0 left-0 right-0 z-40 bg-black/90 backdrop-blur-sm border-b border-neon-green/70 shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)]">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Grid3X3 className="w-8 h-8 text-primary-purple" />
-            <h1 className="text-2xl font-bold text-primary-purple glow-effect">
+            <Grid3X3 className="w-8 h-8 text-neon-green" />
+            <h1 className="text-2xl font-bold text-neon-green glow-effect">
               MONAPIX
             </h1>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="hidden md:flex items-center gap-4 text-sm">
-              <div className="text-gray-300">
-                From: <span className="text-yellow-400">1.0 ETH</span>
+              <div className="text-neon-blue">
+                From: <span className="text-neon-green font-bold">1.0 MON</span>
               </div>
-              <div className="text-gray-300">
-                Minted: <span className="text-primary-purple">0/65,536</span>
+              <div className="text-neon-blue">
+                Minted: <span className="text-neon-green font-bold">{totalSupply?.toString() || '...'}/65,536</span>
               </div>
             </div>
 
             {isConnected ? (
               <div className="flex items-center gap-2">
-                <div className="hidden sm:flex items-center gap-2 text-sm text-gray-300">
-                  <User className="w-4 h-4" />
-                  <span>{formatAddress(account!)}</span>
+                <div className="hidden sm:flex items-center gap-2 text-sm text-neon-blue">
+                  <User className="w-4 h-4 text-neon-green" />
+                  <span className="font-mono text-neon-green">{formatAddress(account!)}</span>
                 </div>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={disconnectWallet}
-                  className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                  onClick={() => disconnect()}
+                  className="text-neon-green neon-border"
                 >
                   Disconnect
                 </Button>
@@ -50,12 +52,11 @@ export const Header = () => {
             ) : (
               <Button
                 size="sm"
-                className="cyber-button"
-                onClick={connectWallet}
-                disabled={isConnecting}
+                className="focus-neon neon-border"
+                onClick={() => connect({ connector: connectors[0] })}
               >
-                <Wallet className="w-4 h-4 mr-2" />
-                {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+                <Wallet className="w-4 h-4 mr-2 text-neon-green" />
+                Connect Wallet
               </Button>
             )}
           </div>

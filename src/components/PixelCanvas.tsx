@@ -148,6 +148,7 @@ export const PixelCanvas = () => {
         color: updatedPixel.color,
         image_url: updatedPixel.image_url,
         link: updatedPixel.link,
+        unlocked_at: updatedPixel.unlocked_at,
         owner_wallet: updatedPixel.owner_wallet,
         price: updatedPixel.price
       });
@@ -221,6 +222,7 @@ export const PixelCanvas = () => {
           y: coords.y,
           color: '#ffffff',
           price: 1,
+          unlocked_at: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });

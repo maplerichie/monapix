@@ -4,12 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Palette, Upload, Link, ShoppingCart, X } from 'lucide-react';
+import { Palette, Upload, Link, Asterisk, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useWeb3 } from '@/contexts/Web3Context';
+import { useAccount } from 'wagmi';
 import { type Pixel } from '@/hooks/usePixelData';
 import { Slider } from '@/components/ui/slider';
+import { useMintPixel, usePurchasePixel } from '@/lib/monapixContract';
+import { usePixelData } from '@/hooks/usePixelData';
 
 interface PixelEditorProps {
   pixel: Pixel;
@@ -22,6 +24,8 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
   onSave,
   onClose,
 }) => {
+  const DAY_IN_SECONDS = 10; // 24 * 60 * 60;
+  const LOCK_BONUS = 0.2;
   const [color, setColor] = useState(pixel.color);
   const [link, setLink] = useState(pixel.link || '');
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(pixel.image_url || null);
@@ -29,10 +33,11 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [lockPeriod, setLockPeriod] = useState(1); // 1-7 steps
   const basePrice = pixel.price || 1;
-  const resellPrice = +(basePrice + lockPeriod * 0.1).toFixed(2);
-  const unlockDate = new Date(Date.now() + lockPeriod * 24 * 60 * 60 * 1000);
+  const resellPrice = +(basePrice + lockPeriod * LOCK_BONUS).toFixed(2);
+  const unlockDate = new Date(Date.now() + lockPeriod * DAY_IN_SECONDS * 1000);
 
-  const { account, isConnected, connectWallet } = useWeb3();
+  const { address: account, isConnected } = useAccount();
+  const { createTransaction } = usePixelData();
 
   const presetColors = [
     '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff',
@@ -44,7 +49,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
     setColor(newColor);
   };
 
-  const handleSave = async () => {
+  const handlePixel = async (action: 'mint' | 'purchase') => {
     if (!isConnected) {
       toast.error('Please connect your wallet first');
       return;
@@ -53,54 +58,47 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
     setIsProcessing(true);
 
     try {
-      // Simulate smart contract interaction
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let imageUrl: string | undefined;
+      if (imageToUpload) {
+        imageUrl = await uploadImageToStorage(imageToUpload);
+      }
 
-      const updatedPixel: Pixel = {
-        ...pixel,
-        color,
-        image_url: uploadedImageUrl || undefined,
-        link: link || undefined,
-        owner_wallet: account!,
-        price: pixel.price || 1,
-      };
+      // Prepare contract call arguments
+      const x = pixel.x;
+      const y = pixel.y;
+      const lockedDays = BigInt(lockPeriod); // lockPeriod is in days
+      const value = BigInt(Math.floor((pixel.price || 1) * 1e18)); // Assuming price is in MON, convert to wei
 
-      onSave(updatedPixel);
-      toast.success('Pixel updated successfully!');
-    } catch (error) {
-      toast.error('Failed to update pixel');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+      let hash: string;
+      if (action === 'mint') {
+        hash = await useMintPixel(x, y, lockedDays, value);
+      } else {
+        hash = await usePurchasePixel(x, y, lockedDays, value);
+      }
 
-  const handleMint = async () => {
-    if (!isConnected) {
-      await connectWallet();
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      // Simulate smart contract minting
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      const imageUrl = await uploadImageToStorage(imageToUpload);
 
       const mintedPixel: Pixel = {
         ...pixel,
-        color,
+        color: imageToUpload ? undefined : color,
         image_url: imageUrl || undefined,
         link: link || undefined,
         owner_wallet: account!,
-        price: pixel.price || 1,
+        unlocked_at: Math.floor(Date.now() / 1000 + (lockPeriod * DAY_IN_SECONDS)),
+        price: resellPrice,
       };
-
-      onSave(mintedPixel);
-      toast.success(`Pixel minted for ${pixel.price || 1} ETH!`);
-    } catch (error) {
-      toast.error('Mint failed');
+      if (hash) {
+        await createTransaction({
+          pixel_id: pixel.pixel_id,
+          transaction_type: action === 'purchase' ? 'purchase' : 'mint',
+          from_wallet: action === 'mint' ? undefined : pixel.owner_wallet,
+          to_wallet: account!,
+          transaction_hash: hash,
+        });
+        onSave(mintedPixel);
+        toast.success(`Pixel ${action === 'mint' ? 'minted' : 'purchased'} for ${pixel.price || 1} MON!`);
+      }
+    } catch (error: any) {
+      toast.error(`${action === 'mint' ? 'Mint' : 'Purchase'} failed: ${error?.details || error}`);
     } finally {
       setIsProcessing(false);
     }
@@ -219,17 +217,17 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
 
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-md min-w-96 w-auto bg-black/95 border-neon-green text-white">
+      <DialogContent className="max-w-md min-w-96 w-auto bg-black/95 border-neon-green neon-border shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)] text-white">
         <DialogHeader>
           <DialogTitle className="text-neon-green glow-effect flex items-center gap-2">
-            <Palette className="w-5 h-5" />
+            <Palette className="w-5 h-5 text-neon-green" />
             <span className="text-md text-neon-blue pl-4">
               ({pixel.x}, {pixel.y})
             </span>
           </DialogTitle>
           <div className="text-sm text-neon-blue">
             {pixel.owner_wallet && (
-              <div className="text-xs text-purple-400">
+              <div className="text-xs text-neon-green">
                 Owned by: {pixel.owner_wallet.slice(0, 6)}...{pixel.owner_wallet.slice(-4)}
               </div>
             )}
@@ -268,8 +266,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
                 {presetColors.map((presetColor) => (
                   <button
                     key={presetColor}
-                    className={`w-8 h-8 border-2 rounded ${color === presetColor ? 'border-neon-green' : 'border-gray-600'
-                      }`}
+                    className={`w-8 h-8 border-2 rounded ${color === presetColor ? 'border-neon-green neon-border' : 'border-gray-600'} ${color === presetColor ? 'ring-2 ring-neon-green' : ''}`}
                     style={{ backgroundColor: presetColor }}
                     onClick={() => handleColorChange(presetColor)}
                   />
@@ -317,7 +314,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
             value={link}
             onChange={(e) => setLink(e.target.value)}
             className="bg-gray-800 border-neon-green/50"
-            placeholder="https://example.com"
+            placeholder="https://monapix.com (optional)"
           />
         </div>
 
@@ -337,44 +334,34 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
           </div>
           <div className="flex flex-col gap-1 mt-2 text-xs">
             <span className="text-neon-blue">Unlock at {unlockDate.toLocaleString()}</span>
-            <span className="text-yellow-400 text-lg">Resell at {resellPrice} ETH</span>
+            <span className="text-yellow-400 text-lg">Resell at {resellPrice} MON</span>
           </div>
         </div>
 
         <div className="flex gap-2 pt-4">
-          {pixel.owner_wallet ? (
+          {!isConnected ? (
             <Button
-              onClick={handleSave}
-              disabled={isProcessing || !isConnected}
-              className="cyber-button flex-1"
+              onClick={() => toast.error('Please use the Connect Wallet button in the header.')}
+              className="flex-1"
             >
-              {isProcessing ? 'Updating...' : 'Update Pixel'}
+              Connect Wallet
             </Button>
-          ) : (
-            <Button
-              onClick={handleMint}
-              disabled={isProcessing}
-              className="cyber-button flex-1"
-            >
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              {isProcessing ? 'Minting...' : `Mint for ${pixel.price || 1} ETH`}
-            </Button>
-          )}
-
+          ) : <Button
+            onClick={() => handlePixel(pixel.owner_wallet ? 'purchase' : 'mint')}
+            disabled={isProcessing}
+            className="flex-1"
+          >
+            {isProcessing ? 'Processing...' : (`${pixel.owner_wallet ? 'Purchase' : 'Mint'} for ${pixel.price || 1} MON`)}
+          </Button>
+          }
           <Button
             onClick={onClose}
             variant="outline"
-            className="border-gray-600 text-gray-300"
+            className="border-neon-green text-neon-green"
           >
             Cancel
           </Button>
         </div>
-
-        {!isConnected && (
-          <div className="text-center text-sm text-yellow-400">
-            Connect your wallet to mint pixels
-          </div>
-        )}
       </DialogContent>
     </Dialog>
   );

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { type Pixel } from '@/hooks/usePixelData';
 
@@ -19,31 +18,24 @@ export const CoordinateTooltip: React.FC<CoordinateTooltipProps> = ({
 }) => {
   return (
     <div
-      className="fixed z-50 bg-black/90 backdrop-blur-sm text-white p-3 rounded-lg border border-primary-purple/50 pointer-events-none animate-fade-in"
+      className="fixed z-50 bg-black/95 backdrop-blur-sm text-neon-green p-3 rounded-lg border border-neon-green neon-border pointer-events-none animate-fade-in shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)]"
       style={{
         left: Math.min(x + 10, window.innerWidth - 200),
         top: Math.max(y - 80, 10),
       }}
     >
       <div className="text-xs space-y-1">
-        <div>X: {pixelX}, Y: {pixelY}</div>
+        <div className="text-neon-blue">X: {pixelX}, Y: {pixelY}</div>
         {pixel ? (
           <>
-            <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 border border-white/50"
-                style={{ backgroundColor: pixel.color }}
-              />
-              <span>{pixel.color}</span>
-            </div>
             {pixel.owner_wallet && (
-              <div className="text-primary-purple">
+              <div className="text-neon-green font-bold">
                 Owner: {pixel.owner_wallet.slice(0, 6)}...{pixel.owner_wallet.slice(-4)}
               </div>
             )}
           </>
         ) : (
-          <div className="text-gray-400">Available for mint</div>
+          <div className="text-neon-green font-bold">Mint now!</div>
         )}
       </div>
     </div>
