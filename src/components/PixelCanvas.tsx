@@ -9,14 +9,15 @@ import {
   calculateViewportBounds,
   getGridSettings,
   constrainPan,
+  getCenteredPan,
   easeOutCubic
 } from '@/utils/canvasUtils';
 
 export const PixelCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(800); // Start at a more reasonable zoom level
-  const [pan, setPan] = useState({ x: 0, y: 0 }); // Start centered
+  const [zoom, setZoom] = useState(400);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
   const [hoveredPixel, setHoveredPixel] = useState<{ x: number; y: number } | null>(null);
   const [selectedPixel, setSelectedPixel] = useState<Pixel | null>(null);
   const [viewingPixel, setViewingPixel] = useState<Pixel | null>(null);
@@ -30,26 +31,20 @@ export const PixelCanvas = () => {
   const { animate, stop } = useSmoothAnimation();
   const { pixels, loading, fetchPixels, savePixel, createTransaction } = usePixelData();
 
-  // Initialize by fetching pixels and centering view
+  // Initialize by fetching pixels
   useEffect(() => {
     fetchPixels();
   }, []);
 
-  // Center the view on first load
+  // Center the view on first load with constrained bounds
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
 
     if (canvas && container && !isInitialized) {
-      const pixelSize = (zoom / 100) * 2;
-      const gridWidth = 256 * pixelSize;
-      const gridHeight = 256 * pixelSize;
-
-      setPan({
-        x: (container.clientWidth - gridWidth) / 2,
-        y: (container.clientHeight - gridHeight) / 2
-      });
-
+      const centeredPan = getCenteredPan(container.clientWidth, container.clientHeight, zoom);
+      const constrainedPan = constrainPan(centeredPan, zoom, container.clientWidth, container.clientHeight);
+      setPan(constrainedPan);
       setIsInitialized(true);
     }
   }, [zoom, isInitialized]);
@@ -79,40 +74,40 @@ export const PixelCanvas = () => {
     if (!ctx) return;
 
     // Clear canvas
-    ctx.fillStyle = '#200052';
+    ctx.fillStyle = '#0a0a0f';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const pixelSize = (zoom / 100) * 2;
     const bounds = calculateViewportBounds(canvas.width, canvas.height, pan, zoom);
     const gridSettings = getGridSettings(zoom);
 
-    // Only draw grid if pixels are large enough to see
+    // Only draw grid if pixels are large enough and within pixel area bounds
     if (pixelSize > 1) {
       // Draw minor grid
       if (gridSettings.minorGrid > 0 && gridSettings.minorOpacity > 0) {
-        ctx.strokeStyle = `rgba(250, 250, 250, ${gridSettings.minorOpacity})`;
+        ctx.strokeStyle = `rgba(100, 100, 120, ${gridSettings.minorOpacity})`;
         ctx.lineWidth = gridSettings.minorLineWidth;
 
-        for (let x = Math.floor(bounds.minX / gridSettings.minorGrid) * gridSettings.minorGrid;
-          x <= bounds.maxX;
+        for (let x = Math.max(0, Math.floor(bounds.minX / gridSettings.minorGrid) * gridSettings.minorGrid);
+          x <= Math.min(255, bounds.maxX);
           x += gridSettings.minorGrid) {
-          if (x >= 0 && x < 256) {
-            const canvasX = x * pixelSize + pan.x;
+          const canvasX = x * pixelSize + pan.x;
+          if (canvasX >= -1 && canvasX <= canvas.width + 1) {
             ctx.beginPath();
-            ctx.moveTo(canvasX, 0);
-            ctx.lineTo(canvasX, canvas.height);
+            ctx.moveTo(canvasX, Math.max(0, pan.y));
+            ctx.lineTo(canvasX, Math.min(canvas.height, 256 * pixelSize + pan.y));
             ctx.stroke();
           }
         }
 
-        for (let y = Math.floor(bounds.minY / gridSettings.minorGrid) * gridSettings.minorGrid;
-          y <= bounds.maxY;
+        for (let y = Math.max(0, Math.floor(bounds.minY / gridSettings.minorGrid) * gridSettings.minorGrid);
+          y <= Math.min(255, bounds.maxY);
           y += gridSettings.minorGrid) {
-          if (y >= 0 && y < 256) {
-            const canvasY = y * pixelSize + pan.y;
+          const canvasY = y * pixelSize + pan.y;
+          if (canvasY >= -1 && canvasY <= canvas.height + 1) {
             ctx.beginPath();
-            ctx.moveTo(0, canvasY);
-            ctx.lineTo(canvas.width, canvasY);
+            ctx.moveTo(Math.max(0, pan.x), canvasY);
+            ctx.lineTo(Math.min(canvas.width, 256 * pixelSize + pan.x), canvasY);
             ctx.stroke();
           }
         }
@@ -120,34 +115,39 @@ export const PixelCanvas = () => {
 
       // Draw major grid
       if (gridSettings.majorGrid > 0) {
-        ctx.strokeStyle = `rgba(250, 250, 250, ${gridSettings.majorOpacity})`;
+        ctx.strokeStyle = `rgba(150, 150, 170, ${gridSettings.majorOpacity})`;
         ctx.lineWidth = gridSettings.majorLineWidth;
 
-        for (let x = Math.floor(bounds.minX / gridSettings.majorGrid) * gridSettings.majorGrid;
-          x <= bounds.maxX;
+        for (let x = Math.max(0, Math.floor(bounds.minX / gridSettings.majorGrid) * gridSettings.majorGrid);
+          x <= Math.min(255, bounds.maxX);
           x += gridSettings.majorGrid) {
-          if (x >= 0 && x < 256) {
-            const canvasX = x * pixelSize + pan.x;
+          const canvasX = x * pixelSize + pan.x;
+          if (canvasX >= -1 && canvasX <= canvas.width + 1) {
             ctx.beginPath();
-            ctx.moveTo(canvasX, 0);
-            ctx.lineTo(canvasX, canvas.height);
+            ctx.moveTo(canvasX, Math.max(0, pan.y));
+            ctx.lineTo(canvasX, Math.min(canvas.height, 256 * pixelSize + pan.y));
             ctx.stroke();
           }
         }
 
-        for (let y = Math.floor(bounds.minY / gridSettings.majorGrid) * gridSettings.majorGrid;
-          y <= bounds.maxY;
+        for (let y = Math.max(0, Math.floor(bounds.minY / gridSettings.majorGrid) * gridSettings.majorGrid);
+          y <= Math.min(255, bounds.maxY);
           y += gridSettings.majorGrid) {
-          if (y >= 0 && y < 256) {
-            const canvasY = y * pixelSize + pan.y;
+          const canvasY = y * pixelSize + pan.y;
+          if (canvasY >= -1 && canvasY <= canvas.height + 1) {
             ctx.beginPath();
-            ctx.moveTo(0, canvasY);
-            ctx.lineTo(canvas.width, canvasY);
+            ctx.moveTo(Math.max(0, pan.x), canvasY);
+            ctx.lineTo(Math.min(canvas.width, 256 * pixelSize + pan.x), canvasY);
             ctx.stroke();
           }
         }
       }
     }
+
+    // Draw pixel area boundary
+    ctx.strokeStyle = 'rgba(200, 200, 220, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(pan.x, pan.y, 256 * pixelSize, 256 * pixelSize);
 
     // Draw pixels (only those in viewport)
     pixels.forEach((pixel) => {
@@ -297,13 +297,13 @@ export const PixelCanvas = () => {
         const canvas = canvasRef.current;
         if (canvas) {
           const targetPan = {
-            x: pan.x + dragMomentum.x * 10,
-            y: pan.y + dragMomentum.y * 10
+            x: pan.x + dragMomentum.x * 8,
+            y: pan.y + dragMomentum.y * 8
           };
           const constrainedTarget = constrainPan(targetPan, zoom, canvas.width, canvas.height);
 
           animate(
-            0, 1, 300,
+            0, 1, 250,
             (progress) => {
               const currentPan = {
                 x: pan.x + (constrainedTarget.x - pan.x) * progress,
@@ -364,8 +364,8 @@ export const PixelCanvas = () => {
     const mouseY = e.clientY - rect.top;
 
     // Smooth zoom with smaller increments
-    const zoomFactor = e.deltaY > 0 ? 0.85 : 1.18;
-    const newZoom = Math.max(200, Math.min(5000, zoom * zoomFactor));
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.max(200, Math.min(4000, zoom * zoomFactor));
 
     // Zoom towards mouse cursor
     const zoomRatio = newZoom / zoom;
@@ -384,7 +384,6 @@ export const PixelCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Zoom towards center when using controls
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const zoomRatio = newZoom / zoom;
@@ -404,23 +403,15 @@ export const PixelCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Center the grid
-    const pixelSize = (zoom / 100) * 2;
-    const gridWidth = 256 * pixelSize;
-    const gridHeight = 256 * pixelSize;
+    const targetPan = getCenteredPan(canvas.width, canvas.height, zoom);
+    const constrainedTarget = constrainPan(targetPan, zoom, canvas.width, canvas.height);
 
-    const targetPan = {
-      x: (canvas.width - gridWidth) / 2,
-      y: (canvas.height - gridHeight) / 2
-    };
-
-    // Smooth animation to center
     animate(
-      0, 1, 500,
+      0, 1, 400,
       (progress) => {
         setPan({
-          x: pan.x + (targetPan.x - pan.x) * progress,
-          y: pan.y + (targetPan.y - pan.y) * progress
+          x: pan.x + (constrainedTarget.x - pan.x) * progress,
+          y: pan.y + (constrainedTarget.y - pan.y) * progress
         });
       },
       undefined,

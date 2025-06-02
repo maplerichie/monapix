@@ -1,4 +1,3 @@
-
 export interface ViewportBounds {
   minX: number;
   maxX: number;
@@ -14,6 +13,10 @@ export interface GridSettings {
   majorLineWidth: number;
   minorLineWidth: number;
 }
+
+// Pixel canvas dimensions
+const PIXEL_GRID_SIZE = 256;
+const PADDING_RATIO = 0.1; // 10% padding around the pixel area
 
 export const calculateViewportBounds = (
   canvasWidth: number,
@@ -35,9 +38,8 @@ export const getGridSettings = (zoom: number): GridSettings => {
   const pixelSize = (zoom / 100) * 2;
 
   if (pixelSize < 2) {
-    // Very zoomed out - show major grid only
     return {
-      majorGrid: 8,
+      majorGrid: 16,
       minorGrid: 0,
       majorOpacity: 0.1,
       minorOpacity: 0,
@@ -45,9 +47,8 @@ export const getGridSettings = (zoom: number): GridSettings => {
       minorLineWidth: 0
     };
   } else if (pixelSize < 8) {
-    // Medium zoom - show reduced grid
     return {
-      majorGrid: 4,
+      majorGrid: 8,
       minorGrid: 0,
       majorOpacity: 0.2,
       minorOpacity: 0,
@@ -55,9 +56,8 @@ export const getGridSettings = (zoom: number): GridSettings => {
       minorLineWidth: 0
     };
   } else if (pixelSize < 16) {
-    // Getting closer - show 4x4 grid
     return {
-      majorGrid: 2,
+      majorGrid: 4,
       minorGrid: 1,
       majorOpacity: 0.3,
       minorOpacity: 0.1,
@@ -65,7 +65,6 @@ export const getGridSettings = (zoom: number): GridSettings => {
       minorLineWidth: 0.3
     };
   } else {
-    // Close zoom - show full grid
     return {
       majorGrid: 1,
       minorGrid: 1,
@@ -93,19 +92,39 @@ export const constrainPan = (
   canvasHeight: number
 ): { x: number; y: number } => {
   const pixelSize = (zoom / 100) * 2;
-  const gridWidth = 256 * pixelSize;
-  const gridHeight = 256 * pixelSize;
+  const gridWidth = PIXEL_GRID_SIZE * pixelSize;
+  const gridHeight = PIXEL_GRID_SIZE * pixelSize;
 
-  // Allow some padding beyond grid boundaries
-  const padding = Math.min(canvasWidth, canvasHeight) * 0.5;
+  // Calculate minimal padding based on canvas size and zoom
+  const padding = Math.min(canvasWidth, canvasHeight) * PADDING_RATIO;
 
-  const minX = Math.min(-padding, canvasWidth - gridWidth - padding);
-  const maxX = Math.max(padding, canvasWidth - padding);
-  const minY = Math.min(-padding, canvasHeight - gridHeight - padding);
-  const maxY = Math.max(padding, canvasHeight - padding);
+  // Calculate bounds to keep the pixel grid area centered with minimal padding
+  const minX = canvasWidth - gridWidth - padding;
+  const maxX = padding;
+  const minY = canvasHeight - gridHeight - padding;
+  const maxY = padding;
+
+  // If the grid is smaller than the canvas, center it
+  const centeredX = gridWidth < canvasWidth ? (canvasWidth - gridWidth) / 2 : pan.x;
+  const centeredY = gridHeight < canvasHeight ? (canvasHeight - gridHeight) / 2 : pan.y;
 
   return {
-    x: Math.max(minX, Math.min(maxX, pan.x)),
-    y: Math.max(minY, Math.min(maxY, pan.y))
+    x: gridWidth < canvasWidth ? centeredX : Math.max(minX, Math.min(maxX, pan.x)),
+    y: gridHeight < canvasHeight ? centeredY : Math.max(minY, Math.min(maxY, pan.y))
+  };
+};
+
+export const getCenteredPan = (
+  canvasWidth: number,
+  canvasHeight: number,
+  zoom: number
+): { x: number; y: number } => {
+  const pixelSize = (zoom / 100) * 2;
+  const gridWidth = PIXEL_GRID_SIZE * pixelSize;
+  const gridHeight = PIXEL_GRID_SIZE * pixelSize;
+
+  return {
+    x: (canvasWidth - gridWidth) / 2,
+    y: (canvasHeight - gridHeight) / 2
   };
 };
