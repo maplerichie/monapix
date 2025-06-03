@@ -19,7 +19,7 @@ export const Header = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Grid3X3 className="w-8 h-8 text-neon-green" />
+            {/* <Grid3X3 className="w-8 h-8 text-neon-green" /> */}
             <h1 className="text-2xl font-bold text-neon-green glow-effect">
               MONAPIX <span className="text-neon-blue text-xs">v0</span>
             </h1>
