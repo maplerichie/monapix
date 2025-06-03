@@ -16,8 +16,8 @@ import {
 export const PixelCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(400);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(300);
+  const [pan, setPan] = useState({ x: -64, y: -64 });
   const [hoveredPixel, setHoveredPixel] = useState<{ x: number; y: number } | null>(null);
   const [selectedPixel, setSelectedPixel] = useState<Pixel | null>(null);
   const [viewingPixel, setViewingPixel] = useState<Pixel | null>(null);
@@ -427,6 +427,46 @@ export const PixelCanvas = () => {
     );
   };
 
+  // Locate random area handler
+  const handleLocateRandomArea = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Pick a random pixel coordinate
+    const randX = Math.floor(Math.random() * 256);
+    const randY = Math.floor(Math.random() * 256);
+    // Pick a random zoom level (e.g., between 800 and 2000)
+    const randomZoom = Math.floor(500 + Math.random() * 2500);
+
+    // Calculate the pan needed to center this pixel
+    const pixelSize = (randomZoom / 100) * 2;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const targetPan = {
+      x: centerX - randX * pixelSize - pixelSize / 2,
+      y: centerY - randY * pixelSize - pixelSize / 2
+    };
+    const constrainedTarget = constrainPan(targetPan, randomZoom, canvas.width, canvas.height);
+
+    // Animate zoom and pan
+    const startZoom = zoom;
+    const startPan = { ...pan };
+    const duration = 500;
+    animate(
+      0, 1, duration,
+      (progress) => {
+        const eased = easeOutCubic(progress);
+        setZoom(startZoom + (randomZoom - startZoom) * eased);
+        setPan({
+          x: startPan.x + (constrainedTarget.x - startPan.x) * eased,
+          y: startPan.y + (constrainedTarget.y - startPan.y) * eased
+        });
+      },
+      undefined,
+      easeOutCubic
+    );
+  };
+
   if (loading) {
     return (
       <div className="w-full h-screen flex items-center justify-center">
@@ -456,6 +496,7 @@ export const PixelCanvas = () => {
         zoom={zoom}
         onZoomChange={handleZoomChange}
         onPanReset={handlePanReset}
+        onLocateRandomArea={handleLocateRandomArea}
       />
 
       {hoveredPixel && (
