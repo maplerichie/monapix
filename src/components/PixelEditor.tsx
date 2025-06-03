@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,7 @@ interface PixelEditorProps {
   onSave: (pixel: Pixel) => void;
   onClose: () => void;
   createTransaction: (transaction: Omit<Transaction, 'id' | 'created_at'>) => Promise<void>;
+  resetImage: boolean;
 }
 
 export const PixelEditor: React.FC<PixelEditorProps> = ({
@@ -24,8 +25,9 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
   onSave,
   onClose,
   createTransaction,
+  resetImage
 }) => {
-  const DAY_IN_SECONDS = 60; // 24 * 60 * 60;
+  const DAY_IN_SECONDS = 24 * 60 * 60;
   const LOCK_BONUS = 0.2;
   const [color, setColor] = useState(pixel.color);
   const [link, setLink] = useState(pixel.link || '');
@@ -46,6 +48,13 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
     '#ffffff', '#808080', '#404040', '#000000'
   ];
 
+  useEffect(() => {
+    if (resetImage) {
+      setImageToUpload(null);
+      setUploadedImageUrl(null);
+    }
+  }, [resetImage]);
+
   const handleColorChange = (newColor: string) => {
     setColor(newColor);
   };
@@ -59,10 +68,12 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
     setIsProcessing(true);
 
     try {
+      pixel.image_url = null;
       let imageUrl: string | undefined;
       if (imageToUpload) {
         imageUrl = await uploadImageToStorage(imageToUpload);
       }
+
 
       // Prepare contract call arguments
       const x = pixel.x;
@@ -80,9 +91,9 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
 
       const mintedPixel: Pixel = {
         ...pixel,
-        color: imageToUpload ? undefined : color,
-        image_url: imageUrl || undefined,
-        link: link || undefined,
+        color: imageToUpload ? null : color,
+        image_url: imageUrl || null,
+        link: link || null,
         owner_wallet: account!,
         unlocked_at: Math.floor(Date.now() / 1000 + (lockPeriod * DAY_IN_SECONDS)),
         price: resellPrice,
@@ -212,6 +223,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
   };
 
   const handleRemoveImage = () => {
+    setImageToUpload(null);
     setUploadedImageUrl(null);
     // toast.success('Image removed');
   };

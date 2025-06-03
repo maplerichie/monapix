@@ -10,12 +10,14 @@ interface PixelInfoModalProps {
   pixel: Pixel | null;
   onClose: () => void;
   onEdit?: () => void;
+  resetImage: (reset: boolean) => void;
 }
 
 export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
   pixel,
   onClose,
   onEdit,
+  resetImage
 }) => {
   const { address: account, isConnected } = useAccount();
 
@@ -132,7 +134,10 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
             <div className="flex-1"></div>
           ) : (
             <Button
-              onClick={onEdit}
+              onClick={() => {
+                resetImage(true);
+                onEdit();
+              }}
               className="flex-1"
               disabled={isLocked}
             >

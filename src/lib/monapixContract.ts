@@ -6,7 +6,7 @@ import { simulateContract, writeContract } from '@wagmi/core'
 import { wagmiConfig } from '@/App';
 
 // Contract address
-export const MONAPIX_CONTRACT_ADDRESS = '0xe8aA38883882a2F50a2F4583FCb445D3200D0Ffa';
+export const MONAPIX_CONTRACT_ADDRESS = '0x937ed3aEda60E22D87a1899b2E9623feCe218bdA';
 
 // Contract config for wagmi
 export const monapixContractConfig = {

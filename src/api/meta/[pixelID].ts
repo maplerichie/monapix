@@ -18,12 +18,12 @@ async function getPixelInfo(pixelID: string) {
 export default async function (req: Request, res: Response) {
   const { pixelID } = req.params;
   const pixel = await getPixelInfo(pixelID);
-  const { x, y } = idToCoords(pixel.pixel_id);
 
   if (!pixel) {
     res.status(404).json({ error: 'Pixel not found' });
     return;
   }
+  const { x, y } = idToCoords(pixel.pixel_id);
 
   // OpenSea metadata standard
   const metadata = {

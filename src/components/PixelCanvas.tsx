@@ -21,6 +21,7 @@ export const PixelCanvas = () => {
   const [hoveredPixel, setHoveredPixel] = useState<{ x: number; y: number } | null>(null);
   const [selectedPixel, setSelectedPixel] = useState<Pixel | null>(null);
   const [viewingPixel, setViewingPixel] = useState<Pixel | null>(null);
+  const [resetImage, setResetImage] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [dragMomentum, setDragMomentum] = useState({ x: 0, y: 0 });
@@ -472,6 +473,7 @@ export const PixelCanvas = () => {
           pixel={viewingPixel}
           onClose={() => setViewingPixel(null)}
           onEdit={handleEditPixel}
+          resetImage={setResetImage}
         />
       )}
 
@@ -481,6 +483,7 @@ export const PixelCanvas = () => {
           onSave={handlePixelSave}
           onClose={() => setSelectedPixel(null)}
           createTransaction={handleTransaction}
+          resetImage={resetImage}
         />
       )}
     </div>
