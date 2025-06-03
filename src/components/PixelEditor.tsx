@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAccount, useConnect } from 'wagmi';
 import { Transaction, type Pixel } from '@/hooks/usePixelData';
 import { Slider } from '@/components/ui/slider';
-import { useMintPixel, usePurchasePixel } from '@/lib/monapixContract';
+import { mintPixel, purchasePixel } from '@/lib/monapixContract';
 
 interface PixelEditorProps {
   pixel: Pixel;
@@ -72,9 +72,9 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
 
       let hash: string;
       if (action === 'mint') {
-        hash = await useMintPixel(x, y, lockedDays, value);
+        hash = await mintPixel(x, y, lockedDays, value);
       } else {
-        hash = await usePurchasePixel(x, y, lockedDays, value);
+        hash = await purchasePixel(x, y, lockedDays, value);
       }
 
 
