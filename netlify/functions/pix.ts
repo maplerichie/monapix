@@ -1,4 +1,5 @@
 import { supabase } from "../../src/integrations/supabase/client";
+import { Config, Context } from "@netlify/functions";
 
 function validatePixelID(pixelID: string): number | null {
     const pixel_id = Number(pixelID);
@@ -67,31 +68,27 @@ function idToCoords(id: number) {
     return { x, y };
 }
 
-export const handler = async (event: any) => {
-    if (event.httpMethod !== 'GET') {
-        return {
-            statusCode: 405,
-            body: 'Method not allowed',
-        };
+export default async (req: Request, context: Context) => {
+    if (req.method !== 'GET') {
+        return new Response("Method not allowed", {
+            status: 405,
+        })
     }
 
-    const pixelID = event.pathParameters?.pixelID;
-
+    const pixelID = context.url.pathname.replaceAll("/pix/", "");
     if (!pixelID || typeof pixelID !== 'string') {
-        return {
-            statusCode: 400,
-            body: 'Invalid pixel ID',
-        };
+        return new Response("Invalid pixel ID", {
+            status: 400,
+        });
     }
 
     try {
         const pixel = await getPixelInfo(pixelID);
 
         if (!pixel) {
-            return {
-                statusCode: 404,
-                body: 'Pixel not found',
-            };
+            return new Response("Pixel not found", {
+                status: 404,
+            });
         }
 
         const { x, y } = idToCoords(pixel.pixel_id);
@@ -139,20 +136,22 @@ export const handler = async (event: any) => {
   <rect x="16" y="52" width="213" height="213" rx="6" ry="6" fill="url(#holoGrad)"/>
 </svg>`;
 
-        return {
-            statusCode: 200,
+        return new Response(svg, {
+            status: 200,
             headers: {
                 'Content-Type': 'image/svg+xml',
                 'Cache-Control': 'public, max-age=300',
                 'X-Content-Type-Options': 'nosniff',
             },
-            body: svg,
-        };
+        });
     } catch (error) {
         console.error('Server error:', error);
-        return {
-            statusCode: 500,
-            body: 'Internal server error',
-        };
+        return new Response(error.toString(), {
+            status: 500,
+        });
     }
-}; 
+};
+
+export const config: Config = {
+    path: "/pix/:id"
+};

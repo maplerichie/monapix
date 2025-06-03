@@ -1,4 +1,5 @@
 import { supabase } from "../../src/integrations/supabase/client";
+import type { Config, Context } from "@netlify/functions";
 
 function validatePixelID(pixelID: string): number | null {
     const pixel_id = Number(pixelID);
@@ -35,31 +36,31 @@ function idToCoords(id: number) {
     return { x, y };
 }
 
-export const handler = async (event: any) => {
-    if (event.httpMethod !== 'GET') {
-        return {
-            statusCode: 405,
-            body: JSON.stringify({ error: 'Method not allowed' }),
-        };
+export const config: Config = {
+    path: "/meta/:pixelID"
+};
+
+export default async (req: Request, context: Context) => {
+    if (req.method !== 'GET') {
+        return new Response("Method not allowed", {
+            status: 405,
+        });
     }
 
-    const pixelID = event.pathParameters?.pixelID;
-
+    const pixelID = context.url.pathname.replaceAll("/meta/", "");
     if (!pixelID || typeof pixelID !== 'string') {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ error: 'Invalid pixel ID' }),
-        };
+        return new Response("Invalid pixel ID", {
+            status: 404,
+        });
     }
 
     try {
         const pixel = await getPixelInfo(pixelID);
 
         if (!pixel) {
-            return {
-                statusCode: 404,
-                body: JSON.stringify({ error: 'Pixel not found' }),
-            };
+            return new Response("Pixel not found", {
+                status: 404,
+            });
         }
 
         const { x, y } = idToCoords(pixel.pixel_id);
@@ -87,19 +88,17 @@ export const handler = async (event: any) => {
             ],
         };
 
-        return {
-            statusCode: 200,
+        return new Response(JSON.stringify(metadata), {
+            status: 200,
             headers: {
                 'Content-Type': 'application/json',
                 'Cache-Control': 'public, max-age=300',
-            },
-            body: JSON.stringify(metadata),
-        };
+            }
+        });
     } catch (error) {
         console.error('Server error:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Internal server error' }),
-        };
+        return new Response(error.toString(), {
+            status: 500,
+        });
     }
 }; 
