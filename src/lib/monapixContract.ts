@@ -66,18 +66,22 @@ export function useIsInLockdown(x: number, y: number) {
 
 export async function mintPixel(x: number, y: number, lockedDays: bigint, value: bigint) {
     return writeContract(wagmiConfig, {
-        ...monapixContractConfig,
+        address: MONAPIX_CONTRACT_ADDRESS as `0x${string}`,
+        abi,
         functionName: 'mintPixel',
         args: [x, y, lockedDays],
-        value
+        value,
+        chain: monadTestnet,
     });
 }
 
 export async function purchasePixel(x: number, y: number, lockedDays: bigint, value: bigint) {
     return writeContract(wagmiConfig, {
-        ...monapixContractConfig,
+        address: MONAPIX_CONTRACT_ADDRESS as `0x${string}`,
+        abi,
         functionName: 'purchasePixel',
         args: [x, y, lockedDays],
         value,
+        chain: monadTestnet,
     });
 }
