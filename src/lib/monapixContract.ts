@@ -2,7 +2,7 @@
 import { useReadContract } from 'wagmi';
 import { monadTestnet } from 'wagmi/chains';
 import abi from '@/contracts/monapix.json';
-import { writeContract } from '@wagmi/core'
+import { simulateContract, writeContract } from '@wagmi/core'
 import { wagmiConfig } from '@/App';
 
 // Contract address
@@ -65,23 +65,23 @@ export function useIsInLockdown(x: number, y: number) {
 // --- Write Functions ---
 
 export async function mintPixel(x: number, y: number, lockedDays: bigint, value: bigint) {
-    return writeContract(wagmiConfig, {
-        address: MONAPIX_CONTRACT_ADDRESS as `0x${string}`,
+    const { request } = await simulateContract(wagmiConfig, {
         abi,
+        address: MONAPIX_CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'mintPixel',
         args: [x, y, lockedDays],
-        value,
-        chain: monadTestnet,
-    });
+        value
+    })
+    return writeContract(wagmiConfig, request);
 }
 
 export async function purchasePixel(x: number, y: number, lockedDays: bigint, value: bigint) {
-    return writeContract(wagmiConfig, {
-        address: MONAPIX_CONTRACT_ADDRESS as `0x${string}`,
+    const { request } = await simulateContract(wagmiConfig, {
         abi,
+        address: MONAPIX_CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'purchasePixel',
         args: [x, y, lockedDays],
-        value,
-        chain: monadTestnet,
-    });
+        value
+    })
+    return writeContract(wagmiConfig, request);
 }
