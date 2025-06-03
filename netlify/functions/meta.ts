@@ -68,7 +68,7 @@ export default async (req: Request, context: Context) => {
         const metadata = {
             name: `Monapix (${x},${y})`,
             description: `Monapix is a pixel-based NFT marketplace where each pixel is a unique, tradable, customizable.`,
-            image: `https://monapix.org/api/pix/${pixel.pixel_id}`,
+            image: `https://monapix.org/pix/${pixel.pixel_id}`,
             external_url: `https://monapix.org`,
             attributes: [
                 { trait_type: 'color', value: pixel.color || '#ffffff' },
