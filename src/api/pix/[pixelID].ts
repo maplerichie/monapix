@@ -1,34 +1,119 @@
+
 import type { Request, Response } from "express";
 import { supabase } from "@/integrations/supabase/client";
 
-// Fetch pixel info from the database by pixelID
-async function getPixelInfo(pixelID: string) {
-  // pixelID from pixel is likely a string, but DB uses number
+// Input validation function
+function validatePixelID(pixelID: string): number | null {
   const pixel_id = Number(pixelID);
-  if (isNaN(pixel_id)) return null;
-  const { data, error } = await supabase
-    .from('pixels')
-    .select('*')
-    .eq('pixel_id', pixel_id)
-    .single();
-  if (error || !data) return null;
-  return data;
+  if (isNaN(pixel_id) || pixel_id < 0 || pixel_id > 255999) {
+    return null;
+  }
+  return pixel_id;
+}
+
+// Sanitize text to prevent XSS in SVG
+function sanitizeText(text: string): string {
+  return text
+    .replace(/[<>&"']/g, (char) => {
+      switch (char) {
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '&': return '&amp;';
+        case '"': return '&quot;';
+        case "'": return '&#x27;';
+        default: return char;
+      }
+    })
+    .substring(0, 100); // Limit length
+}
+
+// Validate color format
+function validateColor(color: string): string {
+  const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+  return colorRegex.test(color) ? color : '#ffffff';
+}
+
+// Validate URL format
+function validateImageUrl(url: string): string {
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.protocol !== 'https:') {
+      return '';
+    }
+    return url.substring(0, 500); // Limit length
+  } catch {
+    return '';
+  }
+}
+
+// Fetch pixel info from the database by pixelID with proper error handling
+async function getPixelInfo(pixelID: string) {
+  const pixel_id = validatePixelID(pixelID);
+  if (pixel_id === null) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('pixels')
+      .select('pixel_id, color, image_url, owner_wallet, unlocked_at, price')
+      .eq('pixel_id', pixel_id)
+      .single();
+    
+    if (error) {
+      console.error('Database error:', error);
+      return null;
+    }
+    return data;
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return null;
+  }
+}
+
+function idToCoords(id: number) {
+  const x = Math.floor(id / 1000);
+  const y = id % 1000;
+  return { x, y };
 }
 
 export default async function (req: Request, res: Response) {
-  const { pixelID } = req.params;
-  const pixel = await getPixelInfo(pixelID);
-
-  if (!pixel) {
-    res.status(404).send('Pixel not found');
+  // Only allow GET requests
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Method not allowed' });
     return;
   }
-  const { x, y } = idToCoords(pixel.pixel_id);
-  const displayOwner = pixel.owner_wallet.slice(0, 8) + '...' + pixel.owner_wallet.slice(-8);
-  const skillLength = Math.floor(Math.random() * 20) + 5; // Random length 5-24
-  const skillPattern = '?'.repeat(skillLength);
 
-  const svg = `<svg width="245" height="405" viewBox="0 0 245 405" xmlns="http://www.w3.org/2000/svg">
+  const { pixelID } = req.params;
+
+  // Validate input
+  if (!pixelID || typeof pixelID !== 'string') {
+    res.status(400).send('Invalid pixel ID');
+    return;
+  }
+
+  try {
+    const pixel = await getPixelInfo(pixelID);
+
+    if (!pixel) {
+      res.status(404).send('Pixel not found');
+      return;
+    }
+
+    const { x, y } = idToCoords(pixel.pixel_id);
+    
+    // Sanitize and validate all data
+    const sanitizedColor = validateColor(pixel.color);
+    const sanitizedImageUrl = pixel.image_url ? validateImageUrl(pixel.image_url) : '';
+    const displayOwner = pixel.owner_wallet ? 
+      sanitizeText(pixel.owner_wallet.slice(0, 8) + '...' + pixel.owner_wallet.slice(-8)) : 
+      'Unknown';
+    const unlockTime = pixel.unlocked_at ? 
+      sanitizeText(new Date(pixel.unlocked_at * 1000).toLocaleString()) : 
+      'N/A';
+    
+    const skillLength = Math.floor(Math.random() * 20) + 5;
+    const skillPattern = '?'.repeat(skillLength);
+
+    const svg = `<svg width="245" height="405" viewBox="0 0 245 405" xmlns="http://www.w3.org/2000/svg">
   <!-- Card Background -->
   <rect width="245" height="405" rx="12" ry="12" fill="#200052" stroke="#836EF9" stroke-width="2"/>
   
@@ -42,10 +127,10 @@ export default async function (req: Request, res: Response) {
   <text x="180" y="35" font-family="'Orbitron', monospace" font-size="14" font-weight="bold" fill="#39FF14">Lv.0</text>
   
   <!-- Main artwork/image area (square) -->
-  <rect x="16" y="52" width="213" height="213" rx="6" ry="6" fill="${pixel.color || '#87CEEB'}" stroke="#836EF9" stroke-width="1"/>
+  <rect x="16" y="52" width="213" height="213" rx="6" ry="6" fill="${sanitizedColor}" stroke="#836EF9" stroke-width="1"/>
   
-  ${pixel.image_url
-      ? `<image href="${pixel.image_url}" x="20" y="56" width="205" height="205" preserveAspectRatio="xMidYMid slice"/>`
+  ${sanitizedImageUrl
+      ? `<image href="${sanitizedImageUrl}" x="20" y="56" width="205" height="205" preserveAspectRatio="xMidYMid slice"/>`
       : `<text x="122.5" y="150" font-family="'Orbitron', monospace" font-size="24" font-weight="bold" fill="#39FF14" text-anchor="middle" opacity="0.8">PIXEL</text>
          <text x="122.5" y="180" font-family="'Orbitron', monospace" font-size="16" fill="#39FF14" text-anchor="middle" opacity="0.6">#${pixel.pixel_id}</text>`
     }
@@ -53,12 +138,12 @@ export default async function (req: Request, res: Response) {
   <!-- Info bar -->
   <rect x="16" y="275" width="213" height="20" fill="#200052" stroke="#836EF9" stroke-width="1"/>
   <text x="20" y="289" font-family="'Orbitron', monospace" font-size="10" fill="#39FF14">ID: ${pixel.pixel_id}</text>
-  <text x="170" y="289" font-family="'Orbitron', monospace" font-size="10" fill="#39FF14">${pixel.price} MON</text>
+  <text x="170" y="289" font-family="'Orbitron', monospace" font-size="10" fill="#39FF14">${pixel.price || '1.0'} MON</text>
   
   <!-- Owner info section -->
   <rect x="16" y="303" width="213" height="35" fill="#200052" stroke="#836EF9" stroke-width="1"/>
   <text x="20" y="317" font-family="'Orbitron', monospace" font-size="10" font-weight="bold" fill="#39FF14">${displayOwner}</text>
-  <text x="20" y="330" font-family="'Orbitron', monospace" font-size="9" fill="#39FF14">Unlock at ${pixel.unlocked_at ? new Date(pixel.unlocked_at * 1000).toLocaleString() : 'N/A'} UTC</text>
+  <text x="20" y="330" font-family="'Orbitron', monospace" font-size="9" fill="#39FF14">Unlock at ${unlockTime} UTC</text>
   
   <!-- Skills section -->
   <rect x="16" y="346" width="213" height="32" fill="#200052" stroke="#836EF9" stroke-width="1"/>
@@ -81,12 +166,12 @@ export default async function (req: Request, res: Response) {
   <rect x="16" y="52" width="213" height="213" rx="6" ry="6" fill="url(#holoGrad)"/>
 </svg>`;
 
-  res.setHeader("Content-Type", "image/svg+xml");
-  res.send(svg);
-}
-
-function idToCoords(id: number) {
-  const x = Math.floor(id / 1000);
-  const y = id % 1000;
-  return { x, y };
+    res.setHeader("Content-Type", "image/svg+xml");
+    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minute cache
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.send(svg);
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).send('Internal server error');
+  }
 }
