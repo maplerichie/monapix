@@ -1,3 +1,4 @@
+
 import { useReadContract } from 'wagmi';
 import { monadTestnet } from 'wagmi/chains';
 import abi from '@/contracts/monapix.json';
@@ -12,65 +13,58 @@ export const monapixContractConfig = {
     address: MONAPIX_CONTRACT_ADDRESS as `0x${string}`,
     abi,
     chainId: monadTestnet.id,
-};
+} as const;
 
 // --- Read Hooks ---
 
-export function useTotalSupply(options = {}) {
+export function useTotalSupply() {
     return useReadContract({
         ...monapixContractConfig,
         functionName: 'totalSupply',
-        ...options,
     });
 }
 
-export function usePixelPrice(options = {}) {
+export function usePixelPrice() {
     return useReadContract({
         ...monapixContractConfig,
         functionName: 'pixelPrice',
-        ...options,
     });
 }
 
-export function useLockBonus(options = {}) {
+export function useLockBonus() {
     return useReadContract({
         ...monapixContractConfig,
         functionName: 'lockBonus',
-        ...options,
     });
 }
 
-export function useOwnerOf(tokenId: bigint, options = {}) {
+export function useOwnerOf(tokenId: bigint) {
     return useReadContract({
         ...monapixContractConfig,
         functionName: 'ownerOf',
         args: [tokenId],
-        ...options,
     });
 }
 
-export function useGetRemainingLockTime(tokenId: bigint, options = {}) {
+export function useGetRemainingLockTime(tokenId: bigint) {
     return useReadContract({
         ...monapixContractConfig,
         functionName: 'getRemainingLockTime',
         args: [tokenId],
-        ...options,
     });
 }
 
-export function useIsInLockdown(x: number, y: number, options = {}) {
+export function useIsInLockdown(x: number, y: number) {
     return useReadContract({
         ...monapixContractConfig,
         functionName: 'isInLockdown',
         args: [x, y],
-        ...options,
     });
 }
 
-// --- Write Hooks ---
+// --- Write Functions ---
 
-export function useMintPixel(x: number, y: number, lockedDays: bigint, value: bigint) {
-
+export async function mintPixel(x: number, y: number, lockedDays: bigint, value: bigint) {
     return writeContract(wagmiConfig, {
         ...monapixContractConfig,
         functionName: 'mintPixel',
@@ -79,7 +73,7 @@ export function useMintPixel(x: number, y: number, lockedDays: bigint, value: bi
     });
 }
 
-export function usePurchasePixel(x: number, y: number, lockedDays: bigint, value: bigint) {
+export async function purchasePixel(x: number, y: number, lockedDays: bigint, value: bigint) {
     return writeContract(wagmiConfig, {
         ...monapixContractConfig,
         functionName: 'purchasePixel',
