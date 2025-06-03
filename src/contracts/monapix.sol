@@ -3712,7 +3712,7 @@ contract Monapix is ERC721, Ownable, ReentrancyGuard {
     uint256 public pixelPrice = 1 ether;
     uint256 public lockBonus = 0.2 ether;
 
-    uint256 private constant DAYS = 60; // 1 days;
+    uint256 private constant DAYS = 1 days;
     uint256 private constant MIN_LOCKED = 1; // days
     uint256 private constant MAX_LOCKED = 7; // days
     uint256 private constant OWNER_SHARE = 99; // 99%
@@ -3744,8 +3744,8 @@ contract Monapix is ERC721, Ownable, ReentrancyGuard {
      * @param lockedDays Lock period in days (1-7)
      */
     function mintPixel(
-        uint16 x,
-        uint16 y,
+        uint256 x,
+        uint256 y,
         uint256 lockedDays
     ) external payable nonReentrant {
         uint256 tokenId = (x * 1000) + y;
@@ -3773,8 +3773,8 @@ contract Monapix is ERC721, Ownable, ReentrancyGuard {
      * @dev Purchase a pixel NFT directly after locked period ends
      */
     function purchasePixel(
-        uint16 x,
-        uint16 y,
+        uint256 x,
+        uint256 y,
         uint256 lockedDays
     ) external payable nonReentrant {
         uint256 tokenId = (x * 1000) + y;
@@ -3847,7 +3847,7 @@ contract Monapix is ERC721, Ownable, ReentrancyGuard {
      * @dev Check if pixel is in locked
      * @return True if in locked, false otherwise
      */
-    function isInLockdown(uint16 x, uint16 y) external view returns (bool) {
+    function isInLockdown(uint256 x, uint256 y) external view returns (bool) {
         uint256 tokenId = (x * 1000) + y;
         require(_ownerOf(tokenId) != address(0), "Pixel does not exist");
         return block.timestamp < pixels[tokenId].unlockedAt;

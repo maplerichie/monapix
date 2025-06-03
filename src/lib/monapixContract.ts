@@ -6,7 +6,7 @@ import { simulateContract, writeContract } from '@wagmi/core'
 import { wagmiConfig } from '@/App';
 
 // Contract address - validate format
-const CONTRACT_ADDRESS = '0x937ed3aEda60E22D87a1899b2E9623feCe218bdA';
+const CONTRACT_ADDRESS = '0xB2AefbD8F616aC149645de09972D423CD6047536';
 if (!/^0x[a-fA-F0-9]{40}$/.test(CONTRACT_ADDRESS)) {
   throw new Error('Invalid contract address format');
 }
