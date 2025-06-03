@@ -21,7 +21,7 @@ export const Header = () => {
           <div className="flex items-center gap-3">
             <Grid3X3 className="w-8 h-8 text-neon-green" />
             <h1 className="text-2xl font-bold text-neon-green glow-effect">
-              MONAPIX
+              MONAPIX <span className="text-neon-blue text-xs">v0</span>
             </h1>
           </div>
 
