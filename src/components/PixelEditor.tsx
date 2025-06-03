@@ -25,7 +25,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
   onClose,
   createTransaction,
 }) => {
-  const DAY_IN_SECONDS = 10; // 24 * 60 * 60;
+  const DAY_IN_SECONDS = 60; // 24 * 60 * 60;
   const LOCK_BONUS = 0.2;
   const [color, setColor] = useState(pixel.color);
   const [link, setLink] = useState(pixel.link || '');
