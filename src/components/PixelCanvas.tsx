@@ -29,6 +29,7 @@ export const PixelCanvas = () => {
   const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
   const [isInitialized, setIsInitialized] = useState(false);
   const draggedRef = useRef(false);
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   const { animate, stop } = useSmoothAnimation();
   const { pixels, loading, fetchPixels, savePixel, createTransaction } = usePixelData();
@@ -476,10 +477,10 @@ export const PixelCanvas = () => {
   }
 
   return (
-    <div ref={containerRef} className="w-full h-[100dvh] min-h-[320px] relative overflow-hidden touch-none">
+    <div ref={containerRef} className="w-full h-[100dvh] min-h-[320px] relative overflow-hidden">
       <canvas
         ref={canvasRef}
-        className="pixel-grid w-full h-full cursor-crosshair touch-none"
+        className="pixel-grid w-full h-full cursor-crosshair"
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
@@ -490,6 +491,86 @@ export const PixelCanvas = () => {
         }}
         onClick={handleClick}
         onWheel={handleWheel}
+        onTouchStart={(e) => {
+          if (e.touches.length === 1) {
+            stop();
+            setIsDragging(true);
+            setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+            setDragMomentum({ x: 0, y: 0 });
+            draggedRef.current = false;
+            // For tap-to-select
+            touchStartRef.current = {
+              x: e.touches[0].clientX,
+              y: e.touches[0].clientY,
+              time: Date.now(),
+            };
+            // e.preventDefault();
+          }
+        }}
+        onTouchMove={(e) => {
+          if (isDragging && e.touches.length === 1) {
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - dragStart.x;
+            const deltaY = touch.clientY - dragStart.y;
+            if (!draggedRef.current && (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4)) {
+              draggedRef.current = true;
+            }
+            setDragMomentum({ x: deltaX * 0.1, y: deltaY * 0.1 });
+            const newPan = { x: pan.x + deltaX, y: pan.y + deltaY };
+            const canvas = canvasRef.current;
+            if (canvas) {
+              const constrainedPan = constrainPan(newPan, zoom, canvas.width, canvas.height);
+              setPan(constrainedPan);
+            }
+            setDragStart({ x: touch.clientX, y: touch.clientY });
+            // e.preventDefault();
+          }
+        }}
+        onTouchEnd={(e) => {
+          if (isDragging) {
+            setIsDragging(false);
+            // Tap-to-select logic
+            if (touchStartRef.current && e.changedTouches.length === 1) {
+              const touch = e.changedTouches[0];
+              const dx = touch.clientX - touchStartRef.current.x;
+              const dy = touch.clientY - touchStartRef.current.y;
+              const dt = Date.now() - touchStartRef.current.time;
+              if (Math.abs(dx) < 8 && Math.abs(dy) < 8 && dt < 300 && !draggedRef.current) {
+                // Simulate a click event for handleClick
+                handleClick({
+                  clientX: touch.clientX,
+                  clientY: touch.clientY,
+                  preventDefault: () => { },
+                  stopPropagation: () => { },
+                } as any);
+              }
+              touchStartRef.current = null;
+            }
+            if (Math.abs(dragMomentum.x) > 0.5 || Math.abs(dragMomentum.y) > 0.5) {
+              const canvas = canvasRef.current;
+              if (canvas) {
+                const targetPan = {
+                  x: pan.x + dragMomentum.x * 8,
+                  y: pan.y + dragMomentum.y * 8
+                };
+                const constrainedTarget = constrainPan(targetPan, zoom, canvas.width, canvas.height);
+                animate(
+                  0, 1, 250,
+                  (progress) => {
+                    const currentPan = {
+                      x: pan.x + (constrainedTarget.x - pan.x) * progress,
+                      y: pan.y + (constrainedTarget.y - pan.y) * progress
+                    };
+                    setPan(currentPan);
+                  },
+                  undefined,
+                  easeOutCubic
+                );
+              }
+            }
+            // e.preventDefault();
+          }
+        }}
       />
 
       <CanvasControls
