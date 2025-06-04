@@ -108,6 +108,10 @@
     box-shadow: var(--neon-shadow);
   }
 
+  .neon-shadow {
+    box-shadow: 0 0 20px hsl(var(--neon-green) / 0.7);
+  }
+
   .glow-effect {
     text-shadow: 0 0 10px hsl(var(--primary-purple)), 0 0 20px hsl(var(--neon-green) / 0.7);
   }
