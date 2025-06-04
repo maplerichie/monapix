@@ -94,7 +94,7 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
           <div className="text-neon-green text-xs">{pixel.price ? `${pixel.price} MON` : ''}</div>
         </div>
         {pixel.link ? (
-          <a href={pixel.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-neon-blue text-xs">{pixel.link}</a>
+          <a href={pixel.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-neon-blue text-xs sm:text-sm break-all">{pixel.link}</a>
         ) : <div className="flex-1"></div>}
         <div className="text-neon-green text-xs">Owned a piece of Monad history on Monapix.org</div>
       </div>
@@ -133,26 +133,26 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
   return (
     <>
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent ref={modalRef} className="max-w-md min-w-96 w-auto bg-black/95 border-neon-green neon-border shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)] text-white">
+        <DialogContent ref={modalRef} className="w-full max-w-xs sm:max-w-md min-w-0 bg-black/95 border-neon-green neon-border shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)] text-white p-2 sm:p-6">
           <DialogHeader>
-            <DialogTitle className="text-neon-green glow-effect flex items-center gap-2">
+            <DialogTitle className="text-neon-green glow-effect flex items-center gap-2 text-base sm:text-lg">
               <Palette className="w-5 h-5 text-neon-green" />
               ({pixel.x}, {pixel.y})
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-4">
             {/* Pixel Preview */}
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-2 sm:gap-4 justify-center">
               {pixel.image_url ? (
                 <img
                   src={pixel.image_url}
                   alt="Pixel"
-                  className="w-48 h-48 object-cover rounded-lg"
+                  className="w-24 h-24 sm:w-48 sm:h-48 object-cover rounded-lg"
                 />
               ) : (
                 <div
-                  className="w-48 h-48 border-2 border-neon-green/50 rounded-lg content-center text-center text-white"
+                  className="w-24 h-24 sm:w-48 sm:h-48 border-2 border-neon-green/50 rounded-lg content-center text-center text-white"
                   style={{ backgroundColor: pixel.color }}
                 >
                   {pixel.color}
@@ -166,7 +166,7 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
                 href={pixel.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-neon-blue hover:text-neon-green flex items-center justify-center underline"
+                className="text-neon-blue hover:text-neon-green flex items-center justify-center underline text-xs sm:text-sm break-all"
               >
                 {pixel.link}&nbsp;<ExternalLink className="w-3 h-3 text-neon-green" />
               </a>
@@ -174,7 +174,7 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
 
             {/* Owner */}
             <div>
-              <div className="text-sm text-neon-green">Owned by <span className="font-mono text-neon-blue">
+              <div className="text-xs sm:text-sm text-neon-green">Owned by <span className="font-mono text-neon-blue">
                 {pixel.owner_wallet?.slice(0, 6)}...{pixel.owner_wallet?.slice(-4)}{isOwner && (
                   <span className="text-xs text-neon-green pl-2">(It's you!)</span>
                 )}</span>
@@ -182,10 +182,10 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
             </div>
 
             {/* Status & Last Price Grid */}
-            <div className="grid grid-cols-2 gap-4 text-xs text-neon-blue">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs text-neon-blue">
               {/* Status */}
               <div className="flex flex-col gap-1">
-                <div className="text-sm text-gray-400">Status</div>
+                <div className="text-xs sm:text-sm text-gray-400">Status</div>
                 {isLocked ? (
                   <Badge variant="destructive" className="bg-orange-500 text-white max-w-fit neon-border">
                     Unlocks in: {formatCountdown(countdown)}
@@ -199,8 +199,8 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
               </div>
               {/* Last Price */}
               <div>
-                <div className="text-sm text-gray-400">Last Price</div>
-                <div className="text-lg font-bold text-neon-green">
+                <div className="text-xs sm:text-sm text-gray-400">Last Price</div>
+                <div className="text-base sm:text-lg font-bold text-neon-green">
                   {pixel.price ? `${pixel.price} MON` : '-'}
                 </div>
               </div>
@@ -208,9 +208,9 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2 pt-2">
+          <div className="flex flex-col sm:flex-row gap-2 pt-2 w-full">
             {isOwner ? (
-              <Button className="flex-1 flex items-center gap-2" onClick={() => setShareOpen(true)}>
+              <Button className="flex-1 flex items-center gap-2 min-w-0 text-xs sm:text-base" onClick={() => setShareOpen(true)}>
                 <Share2 className="w-4 h-4" /> Share
               </Button>
             ) : (
@@ -219,7 +219,7 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
                   resetImage(true);
                   onEdit();
                 }}
-                className="flex-1"
+                className="flex-1 min-w-0 text-xs sm:text-base"
                 disabled={isLocked}
               >
                 Purchase
@@ -228,7 +228,7 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
             <Button
               onClick={onClose}
               variant="outline"
-              className="border-neon-green text-neon-green"
+              className="border-neon-green text-neon-green min-w-0 text-xs sm:text-base"
             >
               Close
             </Button>
@@ -237,16 +237,16 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
       </Dialog>
       <Dialog open={shareOpen} onOpenChange={setShareOpen}>
         <DialogTitle hidden></DialogTitle>
-        <DialogContent className="max-w-md min-w-96 w-auto bg-black border-neon-green neon-border text-white" aria-describedby={undefined}>
+        <DialogContent className="w-full max-w-xs sm:max-w-md min-w-0 bg-black border-neon-green neon-border text-white p-2 sm:p-6" aria-describedby={undefined}>
           <div className="flex flex-col items-center">
             <SharePreview />
-            <div className="grid grid-cols-2 gap-2 mt-4">
-              <Button variant="outline" className="flex items-center gap-2 border-neon-green text-neon-green" onClick={handleCopyImage}>
+            <div className="grid grid-cols-2 gap-2 mt-4 w-full">
+              <Button variant="outline" className="flex items-center gap-2 border-neon-green text-neon-green min-w-0 text-xs sm:text-base" onClick={handleCopyImage}>
                 <Image className="w-4 h-4" /> Copy Image
               </Button>
-              <Button variant="outline" className="flex items-center border-neon-green text-neon-green" onClick={() => handlePlatformShare('x')}><Twitter className="w-4 h-4 text-blue-400" /> X </Button>
-              <Button variant="outline" className="flex items-center border-neon-green text-orange-500" onClick={() => handlePlatformShare('reddit')}><svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="8.5" cy="13.5" r="1.5" /><circle cx="15.5" cy="13.5" r="1.5" /><path d="M12 17c1.657 0 3-1.343 3-3H9c0 1.657 1.343 3 3 3z" /><path d="M16.24 7.76l2.12-2.12" /><circle cx="19" cy="5" r="1" /></svg> Reddit</Button>
-              <Button variant="outline" className="flex items-center border-neon-green text-blue-500" onClick={() => handlePlatformShare('telegram')}><Send className="w-4 h-4" /> Telegram</Button>
+              <Button variant="outline" className="flex items-center border-neon-green text-neon-green min-w-0 text-xs sm:text-base" onClick={() => handlePlatformShare('x')}><Twitter className="w-4 h-4 text-blue-400" /> X </Button>
+              <Button variant="outline" className="flex items-center border-neon-green text-orange-500 min-w-0 text-xs sm:text-base" onClick={() => handlePlatformShare('reddit')}><svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="8.5" cy="13.5" r="1.5" /><circle cx="15.5" cy="13.5" r="1.5" /><path d="M12 17c1.657 0 3-1.343 3-3H9c0 1.657 1.343 3 3 3z" /><path d="M16.24 7.76l2.12-2.12" /><circle cx="19" cy="5" r="1" /></svg> Reddit</Button>
+              <Button variant="outline" className="flex items-center border-neon-green text-blue-500 min-w-0 text-xs sm:text-base" onClick={() => handlePlatformShare('telegram')}><Send className="w-4 h-4" /> Telegram</Button>
             </div>
           </div>
         </DialogContent>

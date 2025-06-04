@@ -18,13 +18,13 @@ export const CoordinateTooltip: React.FC<CoordinateTooltipProps> = ({
 }) => {
   return (
     <div
-      className="fixed z-50 bg-black/95 backdrop-blur-sm text-neon-green p-3 rounded-lg border border-neon-green neon-border pointer-events-none animate-fade-in shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)]"
+      className="fixed z-50 bg-black/95 backdrop-blur-sm text-neon-green p-2 sm:p-3 rounded-md sm:rounded-lg border border-neon-green neon-border pointer-events-none animate-fade-in shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)]"
       style={{
-        left: Math.min(x + 10, window.innerWidth - 200),
-        top: Math.max(y - 80, 10),
+        left: Math.min(x + 10, window.innerWidth - 140),
+        top: Math.max(y - 60, 6),
       }}
     >
-      <div className="text-xs space-y-1">
+      <div className="text-xs sm:text-xs space-y-1">
         <div className="text-neon-blue">X: {pixelX}, Y: {pixelY}</div>
         {pixel ? (
           <>

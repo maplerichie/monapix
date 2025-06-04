@@ -230,15 +230,15 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
 
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-md min-w-96 w-auto bg-black/95 border-neon-green neon-border shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)] text-white">
+      <DialogContent className="w-full max-w-xs sm:max-w-md min-w-0 bg-black/95 border-neon-green neon-border shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)] text-white p-2 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-neon-green glow-effect flex items-center gap-2">
+          <DialogTitle className="text-neon-green glow-effect flex items-center gap-2 text-base sm:text-lg">
             <Palette className="w-5 h-5 text-neon-green" />
-            <span className="text-md text-neon-blue pl-4">
+            <span className="text-md text-neon-blue pl-2 sm:pl-4">
               ({pixel.x}, {pixel.y})
             </span>
           </DialogTitle>
-          <div className="text-sm text-neon-blue">
+          <div className="text-xs sm:text-sm text-neon-blue">
             {pixel.owner_wallet && (
               <div className="text-xs text-neon-green">
                 Owned by: {pixel.owner_wallet.slice(0, 6)}...{pixel.owner_wallet.slice(-4)}
@@ -248,38 +248,38 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
         </DialogHeader>
 
         <Tabs defaultValue="color" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-gray-800">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-800 text-xs sm:text-sm">
             <TabsTrigger value="color">Color</TabsTrigger>
             <TabsTrigger value="image">Image</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="color" className="space-y-4">
-            <div className="space-y-2">
-              <Label>Pick a Color</Label>
-              <div className="flex gap-2">
+          <TabsContent value="color" className="space-y-2 sm:space-y-4">
+            <div className="space-y-1 sm:space-y-2">
+              <Label className="text-xs sm:text-sm">Pick a Color</Label>
+              <div className="flex gap-1 sm:gap-2">
                 <Input
                   type="color"
                   value={color}
                   onChange={(e) => handleColorChange(e.target.value)}
-                  className="w-16 h-10 p-1 border-neon-green/50"
+                  className="w-10 h-8 sm:w-16 sm:h-10 p-1 border-neon-green/50"
                 />
                 <Input
                   type="text"
                   value={color}
                   onChange={(e) => handleColorChange(e.target.value)}
-                  className="flex-1 bg-gray-800 border-neon-green/50"
+                  className="flex-1 bg-gray-800 border-neon-green/50 text-xs sm:text-sm"
                   placeholder="#ffffff"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Preset</Label>
+            <div className="space-y-1 sm:space-y-2">
+              <Label className="text-xs sm:text-sm">Preset</Label>
               <div className="grid grid-cols-8 gap-1">
                 {presetColors.map((presetColor) => (
                   <button
                     key={presetColor}
-                    className={`w-8 h-8 border-2 rounded ${color === presetColor ? 'border-neon-green neon-border' : 'border-gray-600'} ${color === presetColor ? 'ring-2 ring-neon-green' : ''}`}
+                    className={`w-6 h-6 sm:w-8 sm:h-8 border-2 rounded ${color === presetColor ? 'border-neon-green neon-border' : 'border-gray-600'} ${color === presetColor ? 'ring-2 ring-neon-green' : ''}`}
                     style={{ backgroundColor: presetColor }}
                     onClick={() => handleColorChange(presetColor)}
                   />
@@ -288,22 +288,22 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
             </div>
           </TabsContent>
 
-          <TabsContent value="image" className="space-y-4">
-            <div className="space-y-2">
-              <Label>Upload Image&nbsp;<span className="text-xs text-neon-blue">Max size: 1MB</span></Label>
+          <TabsContent value="image" className="space-y-2 sm:space-y-4">
+            <div className="space-y-1 sm:space-y-2">
+              <Label className="text-xs sm:text-sm">Upload Image&nbsp;<span className="text-xs text-neon-blue">Max size: 1MB</span></Label>
               {uploadedImageUrl ? (
                 <div className="space-y-2">
-                  <div className="flex relative border-2 border-neon-green/50 rounded-lg p-2 justify-center">
+                  <div className="flex relative border-2 border-neon-green/50 rounded-lg p-1 sm:p-2 justify-center">
                     <img
                       src={uploadedImageUrl}
                       alt="Uploaded preview"
-                      className="w-40 h-40 object-contain rounded-lg"
+                      className="w-24 h-24 sm:w-40 sm:h-40 object-contain rounded-lg"
                     />
                     <button
                       onClick={handleRemoveImage}
                       className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 rounded-full p-1"
                     >
-                      <X className="w-5 h-5 text-white" />
+                      <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </button>
                   </div>
                 </div>
@@ -312,7 +312,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
-                  className="max-w-80 h-32 bg-transparent border-2 border-dashed border-neon-green/30 rounded-lg justify-self-center"
+                  className="w-full max-w-xs sm:max-w-md md:h-40 h-24 bg-transparent border-2 border-dashed border-neon-green/30 rounded-lg justify-self-center text-xs sm:text-sm"
                   disabled={isProcessing}
                 />
               )}
@@ -320,21 +320,21 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
           </TabsContent>
         </Tabs>
 
-        <div className="flex gap-2">
-          <Link className="w-5 h-5 mt-2 text-neon-blue" />
+        <div className="flex gap-1 sm:gap-2 mt-2">
+          <Link className="w-4 h-4 sm:w-5 sm:h-5 mt-2 text-neon-blue" />
           <Input
             type="url"
             value={link}
             onChange={(e) => setLink(e.target.value)}
-            className="bg-gray-800 border-neon-green/50"
+            className="bg-gray-800 border-neon-green/50 text-xs sm:text-sm"
             placeholder="https://monapix.com (optional)"
           />
         </div>
 
         {/* Lock period slider */}
-        <div className="pt-4">
-          <Label>Lock for</Label>
-          <div className="flex items-center gap-4">
+        <div className="pt-2 sm:pt-4">
+          <Label className="text-xs sm:text-sm">Lock for</Label>
+          <div className="flex items-center gap-2 sm:gap-4">
             <Slider
               min={1}
               max={7}
@@ -343,26 +343,26 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
               onValueChange={([v]) => setLockPeriod(v)}
               className="flex-1"
             />
-            <span className="text-neon-green font-mono w-8 text-center">{lockPeriod} days</span>
+            <span className="text-neon-green font-mono w-8 text-center text-xs sm:text-base">{lockPeriod} days</span>
           </div>
-          <div className="flex flex-col gap-1 mt-2 text-xs">
+          <div className="flex flex-col gap-1 mt-1 sm:mt-2 text-xs">
             <span className="text-neon-blue">Unlock at {unlockDate.toLocaleString()}</span>
-            <span className="text-yellow-400 text-lg">Resell at {resellPrice} MON</span>
+            <span className="text-yellow-400 text-base sm:text-lg">Resell at {resellPrice} MON</span>
           </div>
         </div>
 
-        <div className="flex gap-2 pt-4">
+        <div className="flex flex-col sm:flex-row gap-2 pt-2 sm:pt-4 w-full">
           {!isConnected ? (
             <Button
               onClick={() => connect({ connector: connectors[0] })}
-              className="flex-1"
+              className="flex-1 min-w-0 text-xs sm:text-base"
             >
               Connect Wallet
             </Button>
           ) : <Button
             onClick={() => handlePixel(pixel.owner_wallet ? 'purchase' : 'mint')}
             disabled={isProcessing}
-            className="flex-1"
+            className="flex-1 min-w-0 text-xs sm:text-base"
           >
             {isProcessing ? 'Processing...' : (`${pixel.owner_wallet ? 'Purchase' : 'Mint'} for ${pixel.price || 1} MON`)}
           </Button>
@@ -370,7 +370,7 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
           <Button
             onClick={onClose}
             variant="outline"
-            className="border-neon-green text-neon-green"
+            className="border-neon-green text-neon-green min-w-0 text-xs sm:text-base"
           >
             Cancel
           </Button>

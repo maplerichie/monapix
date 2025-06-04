@@ -476,10 +476,10 @@ export const PixelCanvas = () => {
   }
 
   return (
-    <div ref={containerRef} className="w-full h-screen relative overflow-hidden">
+    <div ref={containerRef} className="w-full h-[100dvh] min-h-[320px] relative overflow-hidden touch-none">
       <canvas
         ref={canvasRef}
-        className="pixel-grid w-full h-full cursor-crosshair"
+        className="pixel-grid w-full h-full cursor-crosshair touch-none"
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
