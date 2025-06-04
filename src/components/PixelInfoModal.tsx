@@ -60,16 +60,16 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
   const handlePlatformShare = async (platform: string) => {
     const shareText = `Minted (${pixel.x}, ${pixel.y}) on Monapix!\nOwning a piece of Monad history now! #gmonad\n@monad_xyz @monad_eco @monad_Daily`;
     const shareUrl = window.location.href;
-    const file = await fetch(shareImg).then(r => r.blob()).then(b => new File([b], `pixel-${pixel.x}-${pixel.y}.png`, { type: 'image/png' }));
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        title: 'Monapix',
-        text: shareText,
-        url: shareUrl,
-        files: [file],
-      });
-      return;
-    }
+    // const file = await fetch(shareImg).then(r => r.blob()).then(b => new File([b], `pixel-${pixel.x}-${pixel.y}.png`, { type: 'image/png' }));
+    // if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    //   await navigator.share({
+    //     title: 'Monapix',
+    //     text: shareText,
+    //     url: shareUrl,
+    //     files: [file],
+    //   });
+    //   return;
+    // }
     // Fallback: open platform share intent (no image)
     if (platform === 'x') {
       window.open(`https://x.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
