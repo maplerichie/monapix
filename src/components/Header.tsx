@@ -1,14 +1,27 @@
 import { Button } from '@/components/ui/button';
 import { Wallet, User, Grid3X3, HelpCircle } from 'lucide-react';
-import { useAccount, useDisconnect, useConnect } from 'wagmi';
+import { useAccount, useDisconnect, useConnect, useSwitchChain } from 'wagmi';
 import { useTotalSupply } from '@/lib/monapixContract';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import React, { useEffect } from 'react';
+import { monadTestnet } from 'viem/chains';
 
 export const Header = () => {
-  const { address: account, isConnected } = useAccount();
-  const { connectors, connect } = useConnect()
+  const { address: account, isConnected, chainId } = useAccount();
+  const { connectors, connect } = useConnect();
   const { disconnect } = useDisconnect();
   const { data: totalSupply } = useTotalSupply();
+  const { switchChain, isPending: isSwitching } = useSwitchChain();
+
+  const [networkDialogOpen, setNetworkDialogOpen] = React.useState(false);
+
+  const isWrongNetwork = isConnected && chainId !== monadTestnet.id;
+
+  useEffect(() => {
+    if (isWrongNetwork) {
+      setNetworkDialogOpen(true);
+    }
+  }, [isWrongNetwork]);
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -70,14 +83,48 @@ export const Header = () => {
                   <User className="w-4 h-4 text-neon-green" />
                   <span className="font-mono text-neon-green">{formatAddress(account!)}</span>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => disconnect()}
-                  className="text-neon-green neon-border min-w-0 px-2 py-1 h-8 text-xs"
-                >
-                  Disconnect
-                </Button>
+                {isWrongNetwork ? (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => setNetworkDialogOpen(true)}
+                      className="neon-border min-w-0 px-2 py-1 h-8 text-xs animate-pulse"
+                    >
+                      Wrong Network
+                    </Button>
+                    <Dialog open={networkDialogOpen} onOpenChange={setNetworkDialogOpen}>
+                      <DialogContent className="w-auto bg-black/95 border-neon-green neon-border shadow-[0_0_20px_hsl(var(--neon-green)_/_0.7)] text-white">
+                        <DialogHeader>
+                          <DialogTitle className="">
+                          </DialogTitle>
+                        </DialogHeader>
+                        <DialogDescription asChild>
+                          <div className="flex flex-col gap-2 text-neon-blue text-sm sm:text-base pt-2 space-y-3">
+                            <span>Please switch to <span className="text-neon-green font-bold">Monad Testnet</span></span>
+                            <Button
+                              size="sm"
+                              className="mt-4 neon-border text-neon-green"
+                              disabled={isSwitching}
+                              onClick={() => switchChain?.({ chainId: monadTestnet.id })}
+                            >
+                              {isSwitching ? 'Switching...' : 'Change Network'}
+                            </Button>
+                          </div>
+                        </DialogDescription>
+                      </DialogContent>
+                    </Dialog>
+                  </>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => disconnect()}
+                    className="text-neon-green neon-border min-w-0 px-2 py-1 h-8 text-xs"
+                  >
+                    Disconnect
+                  </Button>
+                )}
               </div>
             ) : (
               <Button
