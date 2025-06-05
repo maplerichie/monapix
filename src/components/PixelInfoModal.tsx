@@ -7,6 +7,19 @@ import { type Pixel } from '@/hooks/usePixelData';
 import { useAccount } from 'wagmi';
 import html2canvas from 'html2canvas';
 
+const SLOGANS = [
+  "Capture Monad’s Moment with Monapix.org!",
+  "Mint Monad Memories. Only on Monapix.org!",
+  "Make Monad History Yours on Monapix.org!",
+  "Be Part of Monad’s Legacy – Monapix.org!",
+  "Your Pixel. Your Monad Story. Monapix.org!",
+  "Where Monad Meets Memory – Monapix.org!",
+  "Own the Block. Mint with Monapix.org!",
+  "Turn Monad Blocks into Art on Monapix.org!",
+  "Immortalize Monad Moments. Monapix.org!",
+  "Claim Your Monad Pixel Today – Monapix.org!"
+]
+
 interface PixelInfoModalProps {
   pixel: Pixel | null;
   onClose: () => void;
@@ -22,7 +35,6 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
 }) => {
   const { address: account, isConnected } = useAccount();
   const [shareOpen, setShareOpen] = useState(false);
-  const [shareImg, setShareImg] = useState<string | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -58,7 +70,7 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
   }
 
   const handlePlatformShare = async (platform: string) => {
-    const shareText = `Minted (${pixel.x}, ${pixel.y}) on Monapix!\nOwning a piece of Monad history now! #gmonad\n@monad_xyz @monad_eco @monad_Daily`;
+    const shareText = `Minted (${pixel.x}, ${pixel.y}) on Monapix!\nOwning a piece of Monad history now! #gmonad\n\n@monad_xyz @monad_eco @monad_Daily`;
     const shareUrl = window.location.href;
     // const file = await fetch(shareImg).then(r => r.blob()).then(b => new File([b], `pixel-${pixel.x}-${pixel.y}.png`, { type: 'image/png' }));
     // if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -96,7 +108,7 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
         {pixel.link ? (
           <a href={pixel.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-neon-blue text-xs sm:text-sm break-all">{pixel.link}</a>
         ) : <div className="flex-1"></div>}
-        <div className="text-neon-green text-xs">Owned a piece of Monad history on Monapix.org</div>
+        <div className="text-neon-green text-xs">{SLOGANS[Math.floor(Math.random() * SLOGANS.length)]}</div>
       </div>
 
     </div>
@@ -109,7 +121,6 @@ export const PixelInfoModal: React.FC<PixelInfoModalProps> = ({
       const canvas = await html2canvas(previewRef.current, { backgroundColor: '#0E100F', scale: 2.5, useCORS: true });
       canvas.toBlob(async (blob) => {
         if (!blob) return;
-        setShareImg(URL.createObjectURL(blob));
         try {
           await navigator.clipboard.write([
             new window.ClipboardItem({ 'image/png': blob })
