@@ -68,13 +68,6 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
     setIsProcessing(true);
 
     try {
-      pixel.image_url = null;
-      let imageUrl: string | undefined;
-      if (imageToUpload) {
-        imageUrl = await uploadImageToStorage(imageToUpload);
-      }
-
-
       // Prepare contract call arguments
       const x = pixel.x;
       const y = pixel.y;
@@ -88,6 +81,11 @@ export const PixelEditor: React.FC<PixelEditorProps> = ({
         hash = await purchasePixel(x, y, lockedDays, value);
       }
 
+      pixel.image_url = null;
+      let imageUrl: string | undefined;
+      if (imageToUpload) {
+        imageUrl = await uploadImageToStorage(imageToUpload);
+      }
 
       const mintedPixel: Pixel = {
         ...pixel,
