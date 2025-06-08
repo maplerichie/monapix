@@ -110,7 +110,7 @@ export default async (req: Request, context: Context) => {
   <text x="180" y="35" font-family="'Orbitron', monospace" font-size="14" font-weight="bold" fill="#39FF14">Lv.0</text>
   <rect x="16" y="52" width="213" height="213" rx="6" ry="6" fill="${sanitizedColor}" stroke="#836EF9" stroke-width="1"/>
   ${sanitizedImageUrl
-                ? `<image href="${sanitizedImageUrl}" x="20" y="56" width="205" height="205" preserveAspectRatio="xMidYMid slice"/>`
+                ? `<image xlink:href="${sanitizedImageUrl}" href="${sanitizedImageUrl}" x="20" y="56" width="205" height="205" crossorigin="anonymous"  preserveAspectRatio="xMidYMid slice"/>`
                 : `<text x="122.5" y="150" font-family="'Orbitron', monospace" font-size="24" font-weight="bold" fill="#39FF14" text-anchor="middle" opacity="0.8">PIXEL</text>
          <text x="122.5" y="180" font-family="'Orbitron', monospace" font-size="16" fill="#39FF14" text-anchor="middle" opacity="0.6">#${pixel.pixel_id}</text>`
             }
@@ -142,6 +142,7 @@ export default async (req: Request, context: Context) => {
                 'Content-Type': 'image/svg+xml',
                 'Cache-Control': 'public, max-age=300',
                 'X-Content-Type-Options': 'nosniff',
+                'Access-Control-Allow-Origin': '*',
             },
         });
     } catch (error) {
