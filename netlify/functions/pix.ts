@@ -107,7 +107,7 @@ export default async (req: Request, context: Context) => {
   <rect width="245" height="405" rx="12" ry="12" fill="#200052" stroke="#836EF9" stroke-width="2"/>
   <rect x="16" y="16" width="213" height="28" rx="4" ry="4" fill="#200052" stroke="#836EF9" stroke-width="1"/>
   <text x="22" y="35" font-family="'Orbitron', monospace" font-size="16" font-weight="bold" fill="#39FF14">Monapix (${x},${y})</text>
-  <text x="180" y="35" font-family="'Orbitron', monospace" font-size="14" font-weight="bold" fill="#39FF14">Lv.0</text>
+  <text x="182" y="34" font-family="'Orbitron', monospace" font-size="12" font-weight="bold" fill="#39FF14">Lv.0</text>
   <rect x="16" y="52" width="213" height="213" rx="6" ry="6" fill="${sanitizedColor}" stroke="#836EF9" stroke-width="1"/>
   ${sanitizedImageUrl
                 ? `<image href="${sanitizedImageUrl}" x="20" y="56" width="205" height="205" crossorigin="anonymous"  preserveAspectRatio="xMidYMid slice"/>`
